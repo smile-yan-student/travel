@@ -1,0 +1,2764 @@
+[
+  {
+    "name": "趵突泉",
+    "aliases": [
+      "趵突泉景区",
+      "趵突泉公园"
+    ],
+    "city": "济南",
+    "district": "历下区",
+    "level": "5A",
+    "category": "景点",
+    "description": "济南七十二名泉之首，被誉为'天下第一泉'，是泉城济南的象征与标志。",
+    "recommended_duration": 120,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "趵突泉主泉",
+        "description": "三窟并发，声如隐雷，'泉源上奋，水涌若轮'",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "天下第一泉，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "李清照纪念堂",
+        "description": "纪念宋代女词人李清照的专题纪念馆",
+        "duration_min": 25,
+        "order": 2,
+        "highlight": "了解济南名士文化",
+        "photo_spot": false
+      },
+      {
+        "name": "泺源堂",
+        "description": "始建于宋代，是趵突泉北岸的主体建筑",
+        "duration_min": 15,
+        "order": 3,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "观澜亭",
+        "description": "观赏趵突泉的最佳位置之一",
+        "duration_min": 15,
+        "order": 4,
+        "highlight": "拍照打卡点",
+        "photo_spot": true
+      },
+      {
+        "name": "万竹园",
+        "description": "江南园林风格的庭院，李苦禅纪念馆所在地",
+        "duration_min": 20,
+        "order": 5,
+        "highlight": "",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "五龙潭",
+        "category": "景点",
+        "description": "济南四大泉群之一，环境清幽",
+        "distance_m": 400,
+        "recommended_slot": "下午",
+        "duration_min": 60
+      },
+      {
+        "name": "泉城广场",
+        "category": "市井",
+        "description": "济南中心广场，音乐喷泉很壮观",
+        "distance_m": 600,
+        "recommended_slot": "晚上",
+        "duration_min": 45
+      },
+      {
+        "name": "恒隆广场",
+        "category": "购物街",
+        "description": "济南高端购物中心",
+        "distance_m": 700,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      }
+    ],
+    "best_time": "全年皆可，雨后泉水喷涌最壮观",
+    "avoid_tips": [
+      "门票40元，建议早上开门就去，人少且泉水最清",
+      "公园内有李清照纪念堂，值得一看"
+    ],
+    "lng": 117.017799,
+    "lat": 36.659498,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "故宫",
+    "aliases": [
+      "故宫博物院",
+      "紫禁城"
+    ],
+    "city": "北京",
+    "district": "东城区",
+    "level": "5A",
+    "category": "景点",
+    "description": "明清两代皇家宫殿，世界现存规模最大、保存最完整的木质结构古建筑群。",
+    "recommended_duration": 240,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "午门",
+        "description": "故宫正门，紫禁城的南门，举行献俘礼等重大仪式的地方",
+        "duration_min": 20,
+        "order": 1,
+        "highlight": "故宫入口，气势恢宏",
+        "photo_spot": true
+      },
+      {
+        "name": "太和殿",
+        "description": "俗称金銮殿，皇帝举行大典的地方，中国现存最大的木结构大殿",
+        "duration_min": 40,
+        "order": 2,
+        "highlight": "故宫核心，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "中和殿",
+        "description": "皇帝去太和殿大典前休息的地方",
+        "duration_min": 15,
+        "order": 3,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "保和殿",
+        "description": "清代赐宴和殿试的场所",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "乾清宫",
+        "description": "明代皇帝寝宫，清代皇帝处理日常政务的地方",
+        "duration_min": 25,
+        "order": 5,
+        "highlight": "内廷正殿",
+        "photo_spot": false
+      },
+      {
+        "name": "交泰殿",
+        "description": "皇后千秋节受庆贺礼的地方，存放二十五宝玺",
+        "duration_min": 15,
+        "order": 6,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "坤宁宫",
+        "description": "明代皇后寝宫，清代改为祭神场所和皇帝大婚洞房",
+        "duration_min": 20,
+        "order": 7,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "御花园",
+        "description": "帝后休憩的宫后苑，奇石古木林立",
+        "duration_min": 30,
+        "order": 8,
+        "highlight": "故宫出口前的园林",
+        "photo_spot": true
+      },
+      {
+        "name": "神武门",
+        "description": "故宫北门，紫禁城的后门",
+        "duration_min": 10,
+        "order": 9,
+        "highlight": "故宫出口",
+        "photo_spot": true
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "景山公园",
+        "category": "景点",
+        "description": "崇祯皇帝自缢处，万春亭可俯瞰故宫全景",
+        "distance_m": 500,
+        "recommended_slot": "下午",
+        "duration_min": 60
+      },
+      {
+        "name": "北海公园",
+        "category": "景点",
+        "description": "中国现存最古老、最完整的皇家园林",
+        "distance_m": 1000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      },
+      {
+        "name": "南锣鼓巷",
+        "category": "老街",
+        "description": "北京最有名的胡同之一，文创与美食",
+        "distance_m": 1500,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "什刹海",
+        "category": "市井",
+        "description": "老北京风情，酒吧街与胡同游",
+        "distance_m": 1800,
+        "recommended_slot": "晚上",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "春秋最佳，建议上午开门即入，避开人流",
+    "avoid_tips": [
+      "必须提前7天20:00在官网预约，现场不售票",
+      "周一闭馆（法定节假日除外）",
+      "建议从午门进，神武门出，不走回头路"
+    ],
+    "lng": 116.39697,
+    "lat": 39.908054,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "张家界国家森林公园",
+    "aliases": [
+      "张家界",
+      "武陵源"
+    ],
+    "city": "张家界",
+    "district": "武陵源区",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国第一个国家森林公园，世界自然遗产，以峰林地貌著称，《阿凡达》取景地。",
+    "recommended_duration": 480,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "金鞭溪",
+        "description": "全长7.5公里，被誉为'世界上最美丽的峡谷'",
+        "duration_min": 90,
+        "order": 1,
+        "highlight": "峡谷溪流",
+        "photo_spot": true
+      },
+      {
+        "name": "袁家界",
+        "description": "《阿凡达》悬浮山取景地，哈利路亚山原型",
+        "duration_min": 90,
+        "order": 2,
+        "highlight": "核心景区，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "天下第一桥",
+        "description": "天然石桥，高350米，世界上最高的天然石桥",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "自然奇观",
+        "photo_spot": true
+      },
+      {
+        "name": "杨家界",
+        "description": "以乌龙寨、天波府闻名，人相对较少",
+        "duration_min": 60,
+        "order": 4,
+        "highlight": "人少景美",
+        "photo_spot": false
+      },
+      {
+        "name": "天子山",
+        "description": "峰林之王，可俯瞰整个武陵源峰林",
+        "duration_min": 90,
+        "order": 5,
+        "highlight": "峰林奇观",
+        "photo_spot": true
+      },
+      {
+        "name": "御笔峰",
+        "description": "天子山标志性景观，几根石柱如笔直立",
+        "duration_min": 20,
+        "order": 6,
+        "highlight": "标志性景观",
+        "photo_spot": true
+      },
+      {
+        "name": "十里画廊",
+        "description": "长5.8公里的峡谷，两侧山峰如画卷",
+        "duration_min": 60,
+        "order": 7,
+        "highlight": "可乘小火车",
+        "photo_spot": true
+      },
+      {
+        "name": "黄石寨",
+        "description": "张家界最大的凌空观景台，'不上黄石寨，枉到张家界'",
+        "duration_min": 60,
+        "order": 8,
+        "highlight": "观景台",
+        "photo_spot": true
+      },
+      {
+        "name": "百龙天梯",
+        "description": "世界最高的户外电梯，高326米，1分58秒到达山顶",
+        "duration_min": 15,
+        "order": 9,
+        "highlight": "世界之最",
+        "photo_spot": true
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "天门山",
+        "category": "景点",
+        "description": "张家界另一著名景区，玻璃栈道和天门洞",
+        "distance_m": 40000,
+        "recommended_slot": "全天",
+        "duration_min": 360
+      },
+      {
+        "name": "大峡谷玻璃桥",
+        "category": "景点",
+        "description": "世界最高最长的玻璃桥",
+        "distance_m": 20000,
+        "recommended_slot": "下午",
+        "duration_min": 180
+      },
+      {
+        "name": "溪布街",
+        "category": "美食街",
+        "description": "张家界特色商业街，美食和文创",
+        "distance_m": 5000,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      }
+    ],
+    "best_time": "春秋最佳，雨后云雾缭绕如仙境",
+    "avoid_tips": [
+      "景区很大，建议安排2天",
+      "山上物价较高，可自带干粮",
+      "百龙天梯和索道需排队，建议早上去"
+    ],
+    "lng": 110.444565,
+    "lat": 29.330584,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "漓江",
+    "aliases": [
+      "漓江风景区",
+      "桂林漓江"
+    ],
+    "city": "桂林",
+    "district": "阳朔县",
+    "level": "5A",
+    "category": "景点",
+    "description": "世界上规模最大、风景最美的岩溶山水游览区，'桂林山水甲天下'的核心。",
+    "recommended_duration": 360,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "象鼻山",
+        "description": "桂林城徽，形似一头巨象驻足江边饮水",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "桂林标志",
+        "photo_spot": true
+      },
+      {
+        "name": "伏波山",
+        "description": "汉代伏波将军马援南征时的驻军处",
+        "duration_min": 30,
+        "order": 2,
+        "highlight": "还珠格格传说",
+        "photo_spot": false
+      },
+      {
+        "name": "叠彩山",
+        "description": "由四山组成，'江山会景处'，可俯瞰桂林全景",
+        "duration_min": 40,
+        "order": 3,
+        "highlight": "登高望远",
+        "photo_spot": true
+      },
+      {
+        "name": "九马画山",
+        "description": "漓江著名景观，石壁上有九匹马的图案",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "经典景观",
+        "photo_spot": true
+      },
+      {
+        "name": "黄布倒影",
+        "description": "20元人民币背景图案，漓江精华",
+        "duration_min": 20,
+        "order": 5,
+        "highlight": "必打卡",
+        "photo_spot": true
+      },
+      {
+        "name": "兴坪古镇",
+        "description": "漓江畔千年古镇，'阳朔美景在兴坪'",
+        "duration_min": 60,
+        "order": 6,
+        "highlight": "古镇风情",
+        "photo_spot": true
+      },
+      {
+        "name": "阳朔西街",
+        "description": "阳朔最繁华的步行街，中西文化交融",
+        "duration_min": 60,
+        "order": 7,
+        "highlight": "洋人街",
+        "photo_spot": true
+      },
+      {
+        "name": "遇龙河",
+        "description": "漓江支流，'小漓江'，竹筏漂流很受欢迎",
+        "duration_min": 90,
+        "order": 8,
+        "highlight": "竹筏漂流",
+        "photo_spot": true
+      },
+      {
+        "name": "十里画廊",
+        "description": "阳朔风景精华路段，可骑行游览",
+        "duration_min": 60,
+        "order": 9,
+        "highlight": "骑行赏景",
+        "photo_spot": true
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "银子岩",
+        "category": "景点",
+        "description": "桂林最美溶洞，'游了银子岩，一世不缺钱'",
+        "distance_m": 20000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "印象刘三姐",
+        "category": "演出",
+        "description": "张艺谋导演的大型山水实景演出",
+        "distance_m": 5000,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      },
+      {
+        "name": "桂林米粉街",
+        "category": "美食街",
+        "description": "桂林特色美食，米粉必吃",
+        "distance_m": 3000,
+        "recommended_slot": "中午",
+        "duration_min": 60
+      }
+    ],
+    "best_time": "4-10月最佳，雨后云雾缭绕如仙境",
+    "avoid_tips": [
+      "建议乘竹筏或游船游览",
+      "20元人民币背景在兴坪段，别错过",
+      "旺季需提前订票"
+    ],
+    "lng": 110.495608,
+    "lat": 24.778291,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "宽窄巷子",
+    "aliases": [
+      "宽窄巷子景区"
+    ],
+    "city": "成都",
+    "district": "青羊区",
+    "level": "4A",
+    "category": "景点",
+    "description": "成都三大历史文化保护区之一，由宽巷子、窄巷子和井巷子三条平行排列的老式街道组成。",
+    "recommended_duration": 120,
+    "must_visit": true,
+    "hot": false,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "宽巷子",
+        "description": "老成都的'闲生活'区，以茶馆、客栈、餐饮为主",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "老成都生活",
+        "photo_spot": true
+      },
+      {
+        "name": "窄巷子",
+        "description": "老成都的'慢生活'区，以酒吧、咖啡、文创为主",
+        "duration_min": 30,
+        "order": 2,
+        "highlight": "小资情调",
+        "photo_spot": true
+      },
+      {
+        "name": "井巷子",
+        "description": "老成都的'新生活'区，以现代艺术和潮流文化为主",
+        "duration_min": 20,
+        "order": 3,
+        "highlight": "现代艺术",
+        "photo_spot": false
+      },
+      {
+        "name": "恺庐",
+        "description": "宽巷子标志性建筑，清代八旗子弟宅邸",
+        "duration_min": 15,
+        "order": 4,
+        "highlight": "历史建筑",
+        "photo_spot": true
+      },
+      {
+        "name": "拴马石",
+        "description": "清代遗留的拴马石，老成都遗迹",
+        "duration_min": 10,
+        "order": 5,
+        "highlight": "历史遗迹",
+        "photo_spot": false
+      },
+      {
+        "name": "成都记忆",
+        "description": "展示老成都文化的主题展区",
+        "duration_min": 20,
+        "order": 6,
+        "highlight": "了解成都历史",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "人民公园",
+        "category": "市井",
+        "description": "成都最具代表性的市民公园，鹤鸣茶社很有名",
+        "distance_m": 800,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "奎星楼街",
+        "category": "美食街",
+        "description": "成都网红美食街，各类特色小吃",
+        "distance_m": 1000,
+        "recommended_slot": "中午",
+        "duration_min": 90
+      },
+      {
+        "name": "春熙路",
+        "category": "购物街",
+        "description": "成都最繁华的商业街",
+        "distance_m": 2000,
+        "recommended_slot": "晚上",
+        "duration_min": 120
+      },
+      {
+        "name": "锦里",
+        "category": "老街",
+        "description": "成都著名历史文化街区，三国文化主题",
+        "distance_m": 3000,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      }
+    ],
+    "best_time": "下午至晚上，夜景很美",
+    "avoid_tips": [
+      "里面餐饮较贵，可只逛不吃",
+      "建议傍晚去，白天晚上风景都能看到",
+      "人很多，注意保管财物"
+    ],
+    "lng": 104.052984,
+    "lat": 30.663564,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "外滩",
+    "aliases": [
+      "上海外滩",
+      "外滩风景区"
+    ],
+    "city": "上海",
+    "district": "黄浦区",
+    "level": "5A",
+    "category": "景点",
+    "description": "上海标志性景观，黄浦江畔的万国建筑博览群，52幢风格迥异的古典复兴大楼，被誉为'万国建筑博物馆'。对岸是陆家嘴摩天大楼群，夜景尤为壮观。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "外滩观景平台",
+        "description": "黄浦江畔的观景大道，全长1.5公里，是欣赏浦东天际线的最佳位置",
+        "duration_min": 40,
+        "order": 1,
+        "highlight": "陆家嘴三件套最佳拍照机位",
+        "photo_spot": true
+      },
+      {
+        "name": "和平饭店",
+        "description": "外滩标志性建筑，Art Deco风格，百年历史，曾是远东最豪华酒店",
+        "duration_min": 20,
+        "order": 2,
+        "highlight": "建筑外观拍照，可进去喝下午茶",
+        "photo_spot": false
+      },
+      {
+        "name": "海关大楼",
+        "description": "外滩标志性建筑，顶部大钟是外滩的标志，准点报时",
+        "duration_min": 15,
+        "order": 3,
+        "highlight": "大钟准点报时",
+        "photo_spot": false
+      },
+      {
+        "name": "外滩源",
+        "description": "外滩的起点，圆明园路步行街，保留了更多原始建筑，人少景美",
+        "duration_min": 30,
+        "order": 4,
+        "highlight": "人少的拍照圣地，复古风",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "南京路步行街",
+        "category": "商业街",
+        "description": "上海最繁华的商业街，百年老字号和现代商场并存",
+        "distance_m": 800,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      },
+      {
+        "name": "豫园",
+        "category": "景点",
+        "description": "江南古典园林，明代私家园林，城隍庙商圈核心",
+        "distance_m": 1500,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      }
+    ],
+    "best_time": "傍晚至夜晚，日落时分看夕阳，天黑后看两岸灯光秀",
+    "avoid_tips": [
+      "节假日人非常多，建议工作日前往",
+      "外滩灯光秀时间：19:00-22:00，整点有特别表演",
+      "想拍空镜建议早上7点前到"
+    ],
+    "lng": 121.487634,
+    "lat": 31.234969,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "黄鹤楼",
+    "aliases": [
+      "武汉黄鹤楼",
+      "黄鹤楼公园"
+    ],
+    "city": "武汉",
+    "district": "武昌区",
+    "level": "5A",
+    "category": "景点",
+    "description": "江南三大名楼之首，素有'天下江山第一楼'之美誉。始建于三国时期，历代屡毁屡建，现在的黄鹤楼为1985年重建。崔颢的'昔人已乘黄鹤去，此地空余黄鹤楼'使其名扬天下。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "黄鹤楼主楼",
+        "description": "五层仿古建筑，高51.4米，每层都有不同主题的展览和观景台",
+        "duration_min": 40,
+        "order": 1,
+        "highlight": "登顶俯瞰长江大桥和武汉三镇",
+        "photo_spot": true
+      },
+      {
+        "name": "白云阁",
+        "description": "黄鹤楼公园第二高点，可拍摄黄鹤楼全景，是经典机位",
+        "duration_min": 20,
+        "order": 2,
+        "highlight": "黄鹤楼全景最佳拍照机位",
+        "photo_spot": true
+      },
+      {
+        "name": "落梅轩",
+        "description": "楚文化表演场所，可观看编钟演奏、楚舞等传统表演",
+        "duration_min": 25,
+        "order": 3,
+        "highlight": "编钟演奏表演，楚文化体验",
+        "photo_spot": false
+      },
+      {
+        "name": "诗碑廊",
+        "description": "收藏历代文人墨客咏黄鹤楼的诗词碑刻，书法艺术长廊",
+        "duration_min": 15,
+        "order": 4,
+        "highlight": "历代诗词碑刻，书法欣赏",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "户部巷",
+        "category": "美食街",
+        "description": "武汉最著名的小吃街，热干面、豆皮、面窝、武昌鱼",
+        "distance_m": 800,
+        "recommended_slot": "早上",
+        "duration_min": 60
+      },
+      {
+        "name": "武汉长江大桥",
+        "category": "景点",
+        "description": "万里长江第一桥，双层公铁两用桥，可步行过桥感受",
+        "distance_m": 500,
+        "recommended_slot": "傍晚",
+        "duration_min": 40
+      }
+    ],
+    "best_time": "傍晚时分，登楼看长江日落和武汉三镇夜景",
+    "avoid_tips": [
+      "黄鹤楼内部是现代建筑，不要期待古建筑",
+      "建议傍晚去，白天和夜景都能看到",
+      "公园内有电瓶车，体力不好可以坐"
+    ],
+    "lng": 114.30114,
+    "lat": 30.538649,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "西湖",
+    "aliases": [
+      "西湖风景区",
+      "杭州西湖"
+    ],
+    "city": "杭州",
+    "district": "西湖区",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国大陆首批国家重点风景名胜区和中国十大风景名胜之一，世界文化遗产。",
+    "recommended_duration": 300,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "断桥残雪",
+        "description": "西湖十景之一，白堤东端，《白蛇传》许仙白娘子相会处",
+        "duration_min": 20,
+        "order": 1,
+        "highlight": "西湖标志，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "白堤",
+        "description": "连接断桥和平湖秋月，两岸桃柳夹岸",
+        "duration_min": 30,
+        "order": 2,
+        "highlight": "漫步赏湖",
+        "photo_spot": true
+      },
+      {
+        "name": "平湖秋月",
+        "description": "西湖十景之一，三面临水的御书楼",
+        "duration_min": 15,
+        "order": 3,
+        "highlight": "赏月佳处",
+        "photo_spot": false
+      },
+      {
+        "name": "苏堤",
+        "description": "北宋苏东坡所建，全长2.8公里，六桥相连",
+        "duration_min": 60,
+        "order": 4,
+        "highlight": "西湖最美长堤",
+        "photo_spot": true
+      },
+      {
+        "name": "三潭印月",
+        "description": "西湖十景之一，小瀛洲岛，人民币一元背面图案",
+        "duration_min": 40,
+        "order": 5,
+        "highlight": "需乘船前往",
+        "photo_spot": true
+      },
+      {
+        "name": "雷峰塔",
+        "description": "西湖南岸，吴越国王钱俶为供奉佛螺髻发舍利而建",
+        "duration_min": 40,
+        "order": 6,
+        "highlight": "登塔看西湖全景",
+        "photo_spot": true
+      },
+      {
+        "name": "净慈寺",
+        "description": "西湖十景'南屏晚钟'所在地",
+        "duration_min": 25,
+        "order": 7,
+        "highlight": "听南屏晚钟",
+        "photo_spot": false
+      },
+      {
+        "name": "花港观鱼",
+        "description": "西湖十景之一，红鱼池、牡丹园、大草坪",
+        "duration_min": 30,
+        "order": 8,
+        "highlight": "赏花观鱼",
+        "photo_spot": false
+      },
+      {
+        "name": "柳浪闻莺",
+        "description": "西湖十景之一，以春景和黄莺鸣叫闻名",
+        "duration_min": 20,
+        "order": 9,
+        "highlight": "春日柳浪",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "河坊街",
+        "category": "老街",
+        "description": "杭州著名历史文化街区，老字号云集",
+        "distance_m": 2000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "南宋御街",
+        "category": "老街",
+        "description": "南宋都城临安的中轴线，仿宋建筑",
+        "distance_m": 2200,
+        "recommended_slot": "下午",
+        "duration_min": 60
+      },
+      {
+        "name": "武林夜市",
+        "category": "夜市",
+        "description": "杭州最热闹的夜市之一",
+        "distance_m": 3000,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      },
+      {
+        "name": "湖滨银泰in77",
+        "category": "购物街",
+        "description": "杭州高端购物中心，西湖边",
+        "distance_m": 1000,
+        "recommended_slot": "晚上",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "春秋最佳，西湖十景各有其时",
+    "avoid_tips": [
+      "建议步行+游船结合，不要全程走路",
+      "节假日人很多，建议早上去",
+      "雷峰塔可登塔看西湖全景"
+    ],
+    "lng": 120.111429,
+    "lat": 30.245564,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "八达岭长城",
+    "aliases": [
+      "八达岭"
+    ],
+    "city": "北京",
+    "district": "延庆区",
+    "level": "5A",
+    "category": "景点",
+    "description": "万里长城的重要组成部分，明长城的精华，海拔1015米。",
+    "recommended_duration": 240,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "关城",
+        "description": "八达岭长城的关隘，东西各有门",
+        "duration_min": 20,
+        "order": 1,
+        "highlight": "长城入口",
+        "photo_spot": true
+      },
+      {
+        "name": "北一楼至北四楼",
+        "description": "长城北段，坡度较缓，适合大多数游客",
+        "duration_min": 60,
+        "order": 2,
+        "highlight": "经典游览段",
+        "photo_spot": true
+      },
+      {
+        "name": "北五楼至北八楼",
+        "description": "长城北段精华，北八楼是最高点",
+        "duration_min": 60,
+        "order": 3,
+        "highlight": "好汉坡所在地",
+        "photo_spot": true
+      },
+      {
+        "name": "南一楼至南四楼",
+        "description": "长城南段，人相对较少，风景好",
+        "duration_min": 40,
+        "order": 4,
+        "highlight": "拍照人少",
+        "photo_spot": false
+      },
+      {
+        "name": "长城博物馆",
+        "description": "全面展示长城历史文化的专题博物馆",
+        "duration_min": 30,
+        "order": 5,
+        "highlight": "免费参观",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "八达岭野生动物园",
+        "category": "景点",
+        "description": "依山而建的野生动物园",
+        "distance_m": 2000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      },
+      {
+        "name": "延庆世园公园",
+        "category": "景点",
+        "description": "2019北京世园会举办地",
+        "distance_m": 10000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "春秋最佳，夏季凉爽，冬季可看雪景",
+    "avoid_tips": [
+      "建议早上去，人少且光线好",
+      "穿舒适运动鞋，台阶较陡",
+      "可坐缆车节省体力"
+    ],
+    "lng": 116.02004,
+    "lat": 40.359729,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "灵隐寺",
+    "aliases": [
+      "灵隐景区",
+      "云林禅寺"
+    ],
+    "city": "杭州",
+    "district": "西湖区",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国佛教禅宗十大古刹之一，江南著名古刹，始建于东晋咸和元年。",
+    "recommended_duration": 150,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "飞来峰",
+        "description": "高209米，山上有五代至宋元时期的石窟造像340余尊",
+        "duration_min": 40,
+        "order": 1,
+        "highlight": "石窟造像，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "天王殿",
+        "description": "灵隐寺第一重殿，供奉弥勒佛和韦驮菩萨",
+        "duration_min": 20,
+        "order": 2,
+        "highlight": "寺院入口",
+        "photo_spot": false
+      },
+      {
+        "name": "大雄宝殿",
+        "description": "灵隐寺主体建筑，高33.6米，供奉释迦牟尼佛",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "寺院核心",
+        "photo_spot": true
+      },
+      {
+        "name": "药师殿",
+        "description": "供奉药师佛，祈求健康平安",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "法堂",
+        "description": "高僧讲经说法的场所",
+        "duration_min": 15,
+        "order": 5,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "济公殿",
+        "description": "供奉济公和尚，灵隐寺特色殿堂",
+        "duration_min": 20,
+        "order": 6,
+        "highlight": "济公故里",
+        "photo_spot": false
+      },
+      {
+        "name": "永福寺",
+        "description": "灵隐景区内的另一座古寺，环境清幽",
+        "duration_min": 25,
+        "order": 7,
+        "highlight": "人少清幽",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "北高峰",
+        "category": "景点",
+        "description": "杭州西湖周边最高峰，可登高望远",
+        "distance_m": 1500,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "龙井村",
+        "category": "市井",
+        "description": "西湖龙井茶原产地，可品茶",
+        "distance_m": 3000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "梅家坞",
+        "category": "美食街",
+        "description": "龙井茶乡，农家菜和茶文化",
+        "distance_m": 5000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "全年皆可，清晨人少清幽",
+    "avoid_tips": [
+      "需先买飞来峰景区门票，再买灵隐寺香花券",
+      "寺内禁止大声喧哗",
+      "可免费领三支香"
+    ],
+    "lng": 120.101379,
+    "lat": 30.240852,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "天安门广场",
+    "aliases": [
+      "天安门"
+    ],
+    "city": "北京",
+    "district": "东城区",
+    "level": "5A",
+    "category": "景点",
+    "description": "世界上最大的城市广场之一，中华人民共和国的象征。",
+    "recommended_duration": 90,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "天安门城楼",
+        "description": "明清两代皇城的正门，开国大典举行地",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "可登楼参观",
+        "photo_spot": true
+      },
+      {
+        "name": "人民英雄纪念碑",
+        "description": "纪念近现代革命烈士的纪念碑",
+        "duration_min": 15,
+        "order": 2,
+        "highlight": "广场中心",
+        "photo_spot": true
+      },
+      {
+        "name": "毛主席纪念堂",
+        "description": "瞻仰毛泽东主席遗容的地方",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "需排队，开放时间有限",
+        "photo_spot": false
+      },
+      {
+        "name": "人民大会堂",
+        "description": "全国人民代表大会召开地",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "外观参观",
+        "photo_spot": false
+      },
+      {
+        "name": "国家博物馆",
+        "description": "中国最大的综合性博物馆",
+        "duration_min": 60,
+        "order": 5,
+        "highlight": "需提前预约，藏品丰富",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "前门大街",
+        "category": "老街",
+        "description": "北京著名商业街，老字号云集",
+        "distance_m": 1000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "大栅栏",
+        "category": "美食街",
+        "description": "老北京商业街区，特色小吃",
+        "distance_m": 1200,
+        "recommended_slot": "中午",
+        "duration_min": 60
+      },
+      {
+        "name": "王府井",
+        "category": "购物街",
+        "description": "北京最著名的商业街",
+        "distance_m": 1500,
+        "recommended_slot": "晚上",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "清晨看升旗，白天参观，夜景也很美",
+    "avoid_tips": [
+      "升旗时间随日出变化，需提前查询",
+      "进入广场需安检，带好身份证"
+    ],
+    "lng": 116.397827,
+    "lat": 39.90374,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "中山陵",
+    "aliases": [
+      "中山陵园风景区"
+    ],
+    "city": "南京",
+    "district": "玄武区",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国近代伟大的民主革命先行者孙中山先生的陵寝及其附属纪念建筑群。",
+    "recommended_duration": 150,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "博爱坊",
+        "description": "中山陵入口，三间四柱冲天式石牌坊，上书'博爱'二字",
+        "duration_min": 15,
+        "order": 1,
+        "highlight": "中山陵入口",
+        "photo_spot": true
+      },
+      {
+        "name": "墓道",
+        "description": "长480米，两侧种植雪松、桧柏，庄严肃穆",
+        "duration_min": 20,
+        "order": 2,
+        "highlight": "林荫大道",
+        "photo_spot": false
+      },
+      {
+        "name": "陵门",
+        "description": "中山陵正门，三拱门，中门上书'天下为公'",
+        "duration_min": 15,
+        "order": 3,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "碑亭",
+        "description": "高17米，内置孙中山先生事迹碑",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "石阶",
+        "description": "共392级台阶，象征当时中国三亿九千二百万同胞",
+        "duration_min": 30,
+        "order": 5,
+        "highlight": "标志性台阶",
+        "photo_spot": true
+      },
+      {
+        "name": "祭堂",
+        "description": "中山陵主体建筑，中西合璧，供有孙中山先生坐像",
+        "duration_min": 30,
+        "order": 6,
+        "highlight": "核心建筑",
+        "photo_spot": true
+      },
+      {
+        "name": "音乐台",
+        "description": "中山陵纪念性建筑之一，露天音乐会场地",
+        "duration_min": 20,
+        "order": 7,
+        "highlight": "建筑精美",
+        "photo_spot": true
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "明孝陵",
+        "category": "景点",
+        "description": "明太祖朱元璋和马皇后的合葬陵墓，世界文化遗产",
+        "distance_m": 1500,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      },
+      {
+        "name": "美龄宫",
+        "category": "景点",
+        "description": "蒋介石和宋美龄的官邸，被誉为'远东第一别墅'",
+        "distance_m": 2000,
+        "recommended_slot": "下午",
+        "duration_min": 60
+      },
+      {
+        "name": "灵谷寺",
+        "category": "景点",
+        "description": "明代佛教寺院，灵谷塔可登高望远",
+        "distance_m": 3000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "南京博物院",
+        "category": "博物馆",
+        "description": "中国三大博物馆之一，藏品丰富",
+        "distance_m": 4000,
+        "recommended_slot": "上午",
+        "duration_min": 180
+      }
+    ],
+    "best_time": "春秋最佳，梧桐大道很美",
+    "avoid_tips": [
+      "需提前预约，免费但限流",
+      "周一闭馆（祭堂）",
+      "台阶很多，穿舒适鞋子"
+    ],
+    "lng": 118.860194,
+    "lat": 32.053901,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "大雁塔",
+    "aliases": [
+      "大慈恩寺",
+      "大雁塔景区"
+    ],
+    "city": "西安",
+    "district": "雁塔区",
+    "level": "5A",
+    "category": "景点",
+    "description": "唐代玄奘法师为保存经卷而建，是西安的标志性建筑。",
+    "recommended_duration": 120,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "大慈恩寺",
+        "description": "唐代皇家寺院，玄奘法师主持修建",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "大雁塔所在寺院",
+        "photo_spot": false
+      },
+      {
+        "name": "大雁塔",
+        "description": "七层楼阁式砖塔，高64.5米，可登塔远眺",
+        "duration_min": 40,
+        "order": 2,
+        "highlight": "西安地标，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "玄奘三藏院",
+        "description": "纪念玄奘法师的建筑群，展示玄奘生平",
+        "duration_min": 25,
+        "order": 3,
+        "highlight": "了解玄奘取经故事",
+        "photo_spot": false
+      },
+      {
+        "name": "大雁塔北广场",
+        "description": "亚洲最大的矩阵式音乐喷泉广场",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "音乐喷泉",
+        "photo_spot": true
+      },
+      {
+        "name": "大唐不夜城",
+        "description": "仿唐文化步行街，夜景极美",
+        "duration_min": 30,
+        "order": 5,
+        "highlight": "夜景必看",
+        "photo_spot": true
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "大唐芙蓉园",
+        "category": "景点",
+        "description": "全方位展示盛唐风貌的大型皇家园林式文化主题公园",
+        "distance_m": 1500,
+        "recommended_slot": "晚上",
+        "duration_min": 120
+      },
+      {
+        "name": "曲江池遗址公园",
+        "category": "景点",
+        "description": "唐代皇家园林遗址，风景优美",
+        "distance_m": 2000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "陕西历史博物馆",
+        "category": "博物馆",
+        "description": "中国第一座大型现代化国家级博物馆",
+        "distance_m": 3000,
+        "recommended_slot": "上午",
+        "duration_min": 180
+      }
+    ],
+    "best_time": "白天参观，晚上北广场音乐喷泉很壮观",
+    "avoid_tips": [
+      "登塔需另购票",
+      "晚上8点左右有音乐喷泉，可安排傍晚游览"
+    ],
+    "lng": 108.944669,
+    "lat": 34.214328,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "亚龙湾",
+    "aliases": [
+      "亚龙湾度假区"
+    ],
+    "city": "三亚",
+    "district": "吉阳区",
+    "level": "4A",
+    "category": "景点",
+    "description": "被誉为'天下第一湾'，拥有7公里长的银白色海滩，沙质细腻，海水清澈。",
+    "recommended_duration": 240,
+    "must_visit": true,
+    "hot": false,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "亚龙湾海滩",
+        "description": "7公里长的银白色海滩，沙质细腻，海水能见度高",
+        "duration_min": 90,
+        "order": 1,
+        "highlight": "天下第一湾",
+        "photo_spot": true
+      },
+      {
+        "name": "亚龙湾热带天堂森林公园",
+        "description": "《非诚勿扰2》取景地，可俯瞰亚龙湾全景",
+        "duration_min": 90,
+        "order": 2,
+        "highlight": "山海一色",
+        "photo_spot": true
+      },
+      {
+        "name": "过江龙索桥",
+        "description": "全长168米，横跨两山之间，《非诚勿扰2》同款",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "网红打卡",
+        "photo_spot": true
+      },
+      {
+        "name": "亚龙湾玫瑰谷",
+        "description": "亚洲最大的玫瑰谷，以玫瑰文化为主题",
+        "duration_min": 60,
+        "order": 4,
+        "highlight": "花海拍照",
+        "photo_spot": true
+      },
+      {
+        "name": "蝴蝶谷",
+        "description": "中国第一个以蝴蝶为主题的公园",
+        "duration_min": 40,
+        "order": 5,
+        "highlight": "亲子推荐",
+        "photo_spot": false
+      },
+      {
+        "name": "贝壳馆",
+        "description": "展示各类珍稀贝壳，海洋科普",
+        "duration_min": 30,
+        "order": 6,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "中心广场",
+        "description": "亚龙湾度假区中心，图腾柱很有特色",
+        "duration_min": 20,
+        "order": 7,
+        "highlight": "",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "蜈支洲岛",
+        "category": "景点",
+        "description": "三亚最美海岛，潜水圣地",
+        "distance_m": 20000,
+        "recommended_slot": "全天",
+        "duration_min": 360
+      },
+      {
+        "name": "海棠湾免税城",
+        "category": "购物街",
+        "description": "全球最大的单体免税店",
+        "distance_m": 15000,
+        "recommended_slot": "下午",
+        "duration_min": 180
+      },
+      {
+        "name": "后海村",
+        "category": "市井",
+        "description": "三亚冲浪圣地，渔村风情",
+        "distance_m": 10000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "11月至次年4月最佳，夏季注意防晒",
+    "avoid_tips": [
+      "紫外线很强，做好防晒",
+      "高端酒店较多，预算充足可住海景房",
+      "可参加潜水等水上项目"
+    ],
+    "lng": 109.64348,
+    "lat": 18.232304,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "龙门石窟",
+    "aliases": [
+      "洛阳龙门石窟",
+      "龙门石窟景区"
+    ],
+    "city": "洛阳",
+    "district": "洛龙区",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国四大石窟之一，世界文化遗产。开凿于北魏孝文帝年间，历经东魏、西魏、北齐、隋、唐、五代、宋等朝代连续大规模营造达400余年之久。今存有窟龛2345个，造像10万余尊。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "西山石窟",
+        "description": "龙门石窟核心区域，绝大多数精品洞窟都在西山，包括奉先寺卢舍那大佛",
+        "duration_min": 90,
+        "order": 1,
+        "highlight": "卢舍那大佛，龙门石窟标志",
+        "photo_spot": true
+      },
+      {
+        "name": "奉先寺",
+        "description": "龙门石窟规模最大、艺术最为精湛的一组摩崖型群雕，卢舍那大佛高17.14米",
+        "duration_min": 30,
+        "order": 2,
+        "highlight": "卢舍那大佛全景，武则天化身",
+        "photo_spot": true
+      },
+      {
+        "name": "东山石窟",
+        "description": "东山石窟数量较少，但看西山全景的最佳位置，擂鼓台三洞有精美造像",
+        "duration_min": 40,
+        "order": 3,
+        "highlight": "隔河看西山石窟全景",
+        "photo_spot": true
+      },
+      {
+        "name": "香山寺",
+        "description": "龙门东山山腰，白居易晚年隐居处，乾隆曾赋诗赞'龙门凡十寺，第一数香山'",
+        "duration_min": 25,
+        "order": 4,
+        "highlight": "白居易隐居地，古朴清幽",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "洛阳老街",
+        "category": "老街",
+        "description": "洛阳老城历史街区，丽景门、十字街夜市，洛阳水席",
+        "distance_m": 12000,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      },
+      {
+        "name": "白马寺",
+        "category": "景点",
+        "description": "中国第一古刹，佛教传入中国后兴建的第一座官办寺院",
+        "distance_m": 15000,
+        "recommended_slot": "上午",
+        "duration_min": 90
+      }
+    ],
+    "best_time": "春秋两季，春季牡丹花开，秋季气候宜人；建议下午游览，夕阳照在卢舍那大佛上非常震撼",
+    "avoid_tips": [
+      "景区很大，建议至少留3-4小时",
+      "西山石窟是重点，东山主要看全景",
+      "建议请讲解，石窟的历史和艺术价值需要讲解才能理解"
+    ],
+    "lng": 112.491087,
+    "lat": 34.569969,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "少林寺",
+    "aliases": [
+      "登封少林寺",
+      "嵩山少林寺",
+      "少林寺景区"
+    ],
+    "city": "郑州",
+    "district": "登封市",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国佛教禅宗祖庭和中国功夫的发源地，世界文化遗产。始建于北魏太和十九年（495年），因坐落于嵩山腹地少室山茂密丛林之中，故名'少林寺'。少林功夫名扬天下，有'天下功夫出少林，少林功夫甲天下'之说。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "少林寺常住院",
+        "description": "少林寺核心建筑，七进院落，山门、天王殿、大雄宝殿、藏经阁等",
+        "duration_min": 60,
+        "order": 1,
+        "highlight": "千年古刹，禅宗祖庭",
+        "photo_spot": true
+      },
+      {
+        "name": "塔林",
+        "description": "少林寺历代高僧的墓塔群，现存248座墓塔，是中国现存最大的塔林",
+        "duration_min": 30,
+        "order": 2,
+        "highlight": "历代高僧墓塔，建筑艺术宝库",
+        "photo_spot": false
+      },
+      {
+        "name": "武术表演馆",
+        "description": "少林武僧功夫表演，每天多场，包括硬气功、象形拳、兵器等",
+        "duration_min": 40,
+        "order": 3,
+        "highlight": "少林功夫表演，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "三皇寨",
+        "description": "嵩山少室山核心景区，悬空栈道、书册崖、连天大峡谷，自然风光壮丽",
+        "duration_min": 90,
+        "order": 4,
+        "highlight": "悬空栈道、书册崖，嵩山精华",
+        "photo_spot": true
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "登封夜市",
+        "category": "美食街",
+        "description": "登封市区夜市，烩面、胡辣汤、少林素饼等河南美食",
+        "distance_m": 15000,
+        "recommended_slot": "晚上",
+        "duration_min": 60
+      }
+    ],
+    "best_time": "春秋两季，建议上午到达，看武僧表演，下午游览三皇寨",
+    "avoid_tips": [
+      "景区很大，建议至少留一天",
+      "三皇寨需要爬山，体力不好可以坐索道",
+      "武术表演时间固定，建议提前查好时间，不要错过"
+    ],
+    "lng": 112.94134,
+    "lat": 34.506981,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "鼓浪屿",
+    "aliases": [
+      "鼓浪屿风景区"
+    ],
+    "city": "厦门",
+    "district": "思明区",
+    "level": "5A",
+    "category": "景点",
+    "description": "世界文化遗产，中国最美五大城区之首，素有'海上花园'、'万国建筑博览'之称。",
+    "recommended_duration": 360,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "日光岩",
+        "description": "鼓浪屿最高峰，海拔92.7米，可俯瞰全岛和厦门市区",
+        "duration_min": 60,
+        "order": 1,
+        "highlight": "必看，俯瞰全景",
+        "photo_spot": true
+      },
+      {
+        "name": "菽庄花园",
+        "description": "台湾富商林尔嘉的私家园林，'藏海'设计巧妙",
+        "duration_min": 40,
+        "order": 2,
+        "highlight": "园林精品",
+        "photo_spot": true
+      },
+      {
+        "name": "皓月园",
+        "description": "纪念郑成功的园林，巨型郑成功雕像",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "民族英雄纪念",
+        "photo_spot": false
+      },
+      {
+        "name": "钢琴博物馆",
+        "description": "国内唯一的钢琴博物馆，收藏近百架古钢琴",
+        "duration_min": 30,
+        "order": 4,
+        "highlight": "音乐之岛特色",
+        "photo_spot": true
+      },
+      {
+        "name": "风琴博物馆",
+        "description": "国内唯一的风琴博物馆，位于八卦楼",
+        "duration_min": 25,
+        "order": 5,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "万国建筑群",
+        "description": "岛上有1000多幢欧式建筑，被誉为'万国建筑博览'",
+        "duration_min": 60,
+        "order": 6,
+        "highlight": "漫步欣赏",
+        "photo_spot": true
+      },
+      {
+        "name": "龙头路",
+        "description": "鼓浪屿最繁华的商业街，美食和文创店云集",
+        "duration_min": 40,
+        "order": 7,
+        "highlight": "逛吃逛吃",
+        "photo_spot": true
+      },
+      {
+        "name": "港仔后海滨浴场",
+        "description": "鼓浪屿最大的海滨浴场，沙细水清",
+        "duration_min": 30,
+        "order": 8,
+        "highlight": "可下海游泳",
+        "photo_spot": true
+      },
+      {
+        "name": "三一堂",
+        "description": "鼓浪屿著名教堂，中西合璧建筑风格",
+        "duration_min": 20,
+        "order": 9,
+        "highlight": "历史建筑",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "中山路步行街",
+        "category": "老街",
+        "description": "厦门最繁华的商业街，骑楼建筑",
+        "distance_m": 2000,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      },
+      {
+        "name": "八市",
+        "category": "美食街",
+        "description": "厦门第八市场，最新鲜的海鲜和小吃",
+        "distance_m": 2500,
+        "recommended_slot": "中午",
+        "duration_min": 90
+      },
+      {
+        "name": "沙坡尾",
+        "category": "文艺",
+        "description": "厦门最早的渔港，现在是文艺青年聚集地",
+        "distance_m": 3000,
+        "recommended_slot": "下午",
+        "duration_min": 60
+      },
+      {
+        "name": "曾厝垵",
+        "category": "美食街",
+        "description": "中国最文艺渔村，民宿和美食云集",
+        "distance_m": 5000,
+        "recommended_slot": "晚上",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "春秋最佳，夏季可下海游泳",
+    "avoid_tips": [
+      "需提前在官网购买船票，现场可能买不到",
+      "岛上没有机动车，全靠步行",
+      "建议住一晚，体验夜晚的宁静"
+    ],
+    "lng": 118.066742,
+    "lat": 24.444256,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "夫子庙",
+    "aliases": [
+      "夫子庙秦淮风光带",
+      "南京夫子庙"
+    ],
+    "city": "南京",
+    "district": "秦淮区",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国四大文庙之一，秦淮风光带核心区域，集历史文化、民俗风情、美食购物于一体。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "夫子庙大成殿",
+        "description": "祭祀孔子的正殿，南京夫子庙核心建筑",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "文庙核心",
+        "photo_spot": true
+      },
+      {
+        "name": "江南贡院",
+        "description": "中国古代最大的科举考场，可了解科举文化",
+        "duration_min": 40,
+        "order": 2,
+        "highlight": "科举博物馆",
+        "photo_spot": true
+      },
+      {
+        "name": "秦淮河",
+        "description": "南京的母亲河，'十里秦淮'繁华之地",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "可乘画舫夜游",
+        "photo_spot": true
+      },
+      {
+        "name": "乌衣巷",
+        "description": "东晋王导、谢安两大豪门居住地，'旧时王谢堂前燕'即指此",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "历史名巷",
+        "photo_spot": true
+      },
+      {
+        "name": "朱雀桥",
+        "description": "秦淮河上的古桥，'朱雀桥边野草花'即指此",
+        "duration_min": 15,
+        "order": 5,
+        "highlight": "",
+        "photo_spot": false
+      },
+      {
+        "name": "老门东",
+        "description": "南京传统民居街区，老字号和文创店云集",
+        "duration_min": 40,
+        "order": 6,
+        "highlight": "老南京风情",
+        "photo_spot": true
+      },
+      {
+        "name": "瞻园",
+        "description": "南京现存历史最久的明代古典园林，太平天国历史博物馆",
+        "duration_min": 30,
+        "order": 7,
+        "highlight": "江南名园",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "老门东美食街",
+        "category": "美食街",
+        "description": "南京特色小吃聚集地",
+        "distance_m": 500,
+        "recommended_slot": "中午",
+        "duration_min": 90
+      },
+      {
+        "name": "水游城",
+        "category": "购物街",
+        "description": "南京大型购物中心",
+        "distance_m": 1000,
+        "recommended_slot": "晚上",
+        "duration_min": 120
+      },
+      {
+        "name": "新街口",
+        "category": "购物街",
+        "description": "南京最繁华的商业中心",
+        "distance_m": 2000,
+        "recommended_slot": "晚上",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "晚上最佳，秦淮河夜景极美",
+    "avoid_tips": [
+      "建议傍晚去，白天晚上都能体验",
+      "可乘画舫游秦淮河",
+      "美食街价格偏高，注意选择"
+    ],
+    "lng": 118.788821,
+    "lat": 32.020726,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "丽江古城",
+    "aliases": [
+      "大研古城",
+      "丽江大研古城"
+    ],
+    "city": "丽江",
+    "district": "古城区",
+    "level": "5A",
+    "category": "景点",
+    "description": "世界文化遗产，中国历史文化名城，中国为数不多的少数民族古城。",
+    "recommended_duration": 360,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "四方街",
+        "description": "丽江古城中心，明清以来滇西北商贸枢纽",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "古城核心",
+        "photo_spot": true
+      },
+      {
+        "name": "木府",
+        "description": "明代丽江土司衙门，'北有故宫，南有木府'",
+        "duration_min": 60,
+        "order": 2,
+        "highlight": "纳西族故宫",
+        "photo_spot": true
+      },
+      {
+        "name": "狮子山万古楼",
+        "description": "丽江古城制高点，可俯瞰全城和玉龙雪山",
+        "duration_min": 40,
+        "order": 3,
+        "highlight": "俯瞰古城全景",
+        "photo_spot": true
+      },
+      {
+        "name": "大水车",
+        "description": "丽江古城标志，古城入口处",
+        "duration_min": 15,
+        "order": 4,
+        "highlight": "打卡拍照",
+        "photo_spot": true
+      },
+      {
+        "name": "酒吧街",
+        "description": "丽江最热闹的地方，沿河两岸酒吧林立",
+        "duration_min": 40,
+        "order": 5,
+        "highlight": "夜生活",
+        "photo_spot": true
+      },
+      {
+        "name": "纳西古乐会",
+        "description": "欣赏纳西古乐，'音乐活化石'",
+        "duration_min": 60,
+        "order": 6,
+        "highlight": "文化体验",
+        "photo_spot": true
+      },
+      {
+        "name": "黑龙潭",
+        "description": "丽江古城水源地，玉龙雪山倒影最佳观赏点",
+        "duration_min": 40,
+        "order": 7,
+        "highlight": "雪山倒影",
+        "photo_spot": true
+      },
+      {
+        "name": "束河古镇",
+        "description": "比大研古城更安静的纳西族古镇",
+        "duration_min": 60,
+        "order": 8,
+        "highlight": "安静休闲",
+        "photo_spot": true
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "玉龙雪山",
+        "category": "景点",
+        "description": "北半球最南的大雪山，纳西族神山",
+        "distance_m": 30000,
+        "recommended_slot": "全天",
+        "duration_min": 480
+      },
+      {
+        "name": "蓝月谷",
+        "category": "景点",
+        "description": "玉龙雪山脚下，湖水湛蓝如宝石",
+        "distance_m": 35000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      },
+      {
+        "name": "拉市海",
+        "category": "景点",
+        "description": "高原湿地，可骑马划船",
+        "distance_m": 15000,
+        "recommended_slot": "下午",
+        "duration_min": 180
+      },
+      {
+        "name": "白沙古镇",
+        "category": "老街",
+        "description": "纳西族最古老的古镇，白沙壁画很有名",
+        "distance_m": 10000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      }
+    ],
+    "best_time": "春秋最佳，四季皆宜",
+    "avoid_tips": [
+      "古城内石板路，建议穿舒适鞋子",
+      "晚上酒吧街很热闹，喜欢安静的住古城边缘",
+      "注意高原反应，丽江海拔2400米"
+    ],
+    "lng": 100.242059,
+    "lat": 26.865657,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "洪崖洞",
+    "aliases": [
+      "重庆洪崖洞",
+      "洪崖洞民俗风貌区"
+    ],
+    "city": "重庆",
+    "district": "渝中区",
+    "level": "4A",
+    "category": "景点",
+    "description": "重庆最具巴渝传统建筑特色的吊脚楼建筑群，依山就势，沿崖而建，共11层，夜晚灯光亮起时如千与千寻中的汤屋，是重庆最火的网红打卡地。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": false,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "千厮门大桥",
+        "description": "拍摄洪崖洞全景的最佳位置，桥上可俯瞰整个洪崖洞和嘉陵江",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "洪崖洞全景最佳拍照机位",
+        "photo_spot": true
+      },
+      {
+        "name": "洪崖洞1楼",
+        "description": "洪崖洞底层，嘉陵江边，可仰视整个吊脚楼建筑群，感受震撼",
+        "duration_min": 20,
+        "order": 2,
+        "highlight": "仰视建筑群，江边吹风",
+        "photo_spot": false
+      },
+      {
+        "name": "洪崖洞11楼",
+        "description": "洪崖洞顶层，沧白路，可俯瞰嘉陵江和江北嘴，也是入口层",
+        "duration_min": 20,
+        "order": 3,
+        "highlight": "俯瞰江景，解放碑方向",
+        "photo_spot": false
+      },
+      {
+        "name": "洪崖洞内部",
+        "description": "11层吊脚楼内部，每层主题不同，有美食、特产、酒吧、表演",
+        "duration_min": 40,
+        "order": 4,
+        "highlight": "体验巴渝民俗，吃重庆小吃",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "解放碑",
+        "category": "商业街",
+        "description": "重庆最繁华的商业中心，抗战胜利纪功碑，8D魔幻城市核心",
+        "distance_m": 800,
+        "recommended_slot": "晚上",
+        "duration_min": 60
+      },
+      {
+        "name": "八一好吃街",
+        "category": "美食街",
+        "description": "重庆最火的美食街，酸辣粉、小面、串串、冰粉应有尽有",
+        "distance_m": 1000,
+        "recommended_slot": "晚上",
+        "duration_min": 60
+      }
+    ],
+    "best_time": "夜晚18:30-22:00，灯光全部亮起时最美，建议日落前到达占机位",
+    "avoid_tips": [
+      "节假日人挤人，建议工作日前往",
+      "电梯排队很长，建议走楼梯，11楼到1楼很快",
+      "洪崖洞内部商业化严重，主要看外观，拍照在千厮门大桥最好"
+    ],
+    "lng": 106.578757,
+    "lat": 29.562117,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "大明湖",
+    "aliases": [
+      "大明湖景区",
+      "大明湖风景区"
+    ],
+    "city": "济南",
+    "district": "历下区",
+    "level": "5A",
+    "category": "景点",
+    "description": "济南三大名胜之一，素有'泉城明珠'美誉，是繁华都市中一处难得的天然湖泊。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "超然楼",
+        "description": "大明湖标志性建筑，始建于元代，夜景极盛",
+        "duration_min": 40,
+        "order": 1,
+        "highlight": "登楼远眺大明湖全景",
+        "photo_spot": true
+      },
+      {
+        "name": "铁公祠",
+        "description": "纪念明代兵部尚书铁铉的祠堂，湖山胜景",
+        "duration_min": 25,
+        "order": 2,
+        "highlight": "佛山倒影奇观观赏点",
+        "photo_spot": true
+      },
+      {
+        "name": "历下亭",
+        "description": "杜甫'海右此亭古，济南名士多'即指此亭",
+        "duration_min": 20,
+        "order": 3,
+        "highlight": "湖中名亭，历史悠久",
+        "photo_spot": false
+      },
+      {
+        "name": "北极阁",
+        "description": "道教庙宇，建于元代，是大明湖北岸制高点",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "可俯瞰湖面",
+        "photo_spot": false
+      },
+      {
+        "name": "南丰祠",
+        "description": "纪念曾巩（南丰先生）的祠堂",
+        "duration_min": 15,
+        "order": 5,
+        "highlight": "",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "曲水亭街",
+        "category": "老街",
+        "description": "济南最具泉城特色的老街，家家泉水户户垂杨",
+        "distance_m": 300,
+        "recommended_slot": "下午",
+        "duration_min": 60
+      },
+      {
+        "name": "芙蓉街",
+        "category": "美食街",
+        "description": "济南最著名的小吃街，各类济南特色美食",
+        "distance_m": 500,
+        "recommended_slot": "中午",
+        "duration_min": 90
+      },
+      {
+        "name": "百花洲",
+        "category": "市井",
+        "description": "明府城核心区域，老济南风情",
+        "distance_m": 200,
+        "recommended_slot": "下午",
+        "duration_min": 45
+      },
+      {
+        "name": "宽厚里",
+        "category": "美食街",
+        "description": "仿古商业街区，美食与文创结合",
+        "distance_m": 800,
+        "recommended_slot": "晚上",
+        "duration_min": 60
+      }
+    ],
+    "best_time": "春秋最佳，夏季可赏荷，夜晚超然楼亮灯极美",
+    "avoid_tips": [
+      "建议从南门进，东门出，不走回头路",
+      "超然楼晚上7点左右亮灯，可安排傍晚游览"
+    ],
+    "lng": 117.032908,
+    "lat": 36.670303,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "颐和园",
+    "aliases": [
+      "颐和园景区"
+    ],
+    "city": "北京",
+    "district": "海淀区",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国清朝时期皇家园林，前身为清漪园，是保存最完整的一座皇家行宫御苑。",
+    "recommended_duration": 240,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "东宫门",
+        "description": "颐和园正门，清代皇帝出入的地方",
+        "duration_min": 15,
+        "order": 1,
+        "highlight": "颐和园入口",
+        "photo_spot": false
+      },
+      {
+        "name": "仁寿殿",
+        "description": "慈禧太后和光绪皇帝坐朝听政的地方",
+        "duration_min": 25,
+        "order": 2,
+        "highlight": "宫廷区核心",
+        "photo_spot": false
+      },
+      {
+        "name": "玉澜堂",
+        "description": "光绪皇帝的寝宫，戊戌变法后曾被囚禁于此",
+        "duration_min": 20,
+        "order": 3,
+        "highlight": "历史意义重大",
+        "photo_spot": false
+      },
+      {
+        "name": "乐寿堂",
+        "description": "慈禧太后的寝宫，院内有玉兰、海棠、牡丹",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "慈禧起居处",
+        "photo_spot": false
+      },
+      {
+        "name": "长廊",
+        "description": "全长728米，中国古典园林中最长的游廊，绘有14000余幅彩画",
+        "duration_min": 40,
+        "order": 5,
+        "highlight": "世界最长画廊，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "佛香阁",
+        "description": "颐和园的标志性建筑，高41米，八面三层四重檐",
+        "duration_min": 40,
+        "order": 6,
+        "highlight": "颐和园制高点，可俯瞰昆明湖",
+        "photo_spot": true
+      },
+      {
+        "name": "昆明湖",
+        "description": "颐和园的湖泊，面积约占全园四分之三",
+        "duration_min": 30,
+        "order": 7,
+        "highlight": "可乘船游览",
+        "photo_spot": true
+      },
+      {
+        "name": "十七孔桥",
+        "description": "连接东堤和南湖岛，桥长150米，17个桥洞",
+        "duration_min": 20,
+        "order": 8,
+        "highlight": "冬至金光穿洞奇观",
+        "photo_spot": true
+      },
+      {
+        "name": "石舫",
+        "description": "清晏舫，中西合璧的石船，慈禧太后曾在此观景",
+        "duration_min": 15,
+        "order": 9,
+        "highlight": "独特建筑",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "圆明园",
+        "category": "景点",
+        "description": "清代大型皇家园林，遗址公园",
+        "distance_m": 2000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      },
+      {
+        "name": "清华大学",
+        "category": "景点",
+        "description": "中国顶尖学府，校园风景优美",
+        "distance_m": 3000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "北京大学",
+        "category": "景点",
+        "description": "中国顶尖学府，未名湖博雅塔",
+        "distance_m": 3500,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      }
+    ],
+    "best_time": "春夏秋皆宜，夏季昆明湖荷花很美",
+    "avoid_tips": [
+      "建议从东宫门进，北宫门出",
+      "可乘船游昆明湖，节省体力",
+      "佛香阁需单独购票"
+    ],
+    "lng": 116.262533,
+    "lat": 39.984134,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "栈桥",
+    "aliases": [
+      "青岛栈桥",
+      "栈桥风景区"
+    ],
+    "city": "青岛",
+    "district": "市南区",
+    "level": "4A",
+    "category": "景点",
+    "description": "青岛的标志性建筑，始建于清光绪十八年（1892年），是青岛最早的军事专用人工码头。全长440米，桥南端筑半圆形防波堤，堤内建有民族形式的两层八角楼，名'回澜阁'。'飞阁回澜'被誉为青岛十景之首。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": false,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "回澜阁",
+        "description": "栈桥南端的八角亭，青岛标志性建筑，登阁可眺望青岛湾全景",
+        "duration_min": 20,
+        "order": 1,
+        "highlight": "青岛标志，登阁看海景",
+        "photo_spot": true
+      },
+      {
+        "name": "栈桥桥面",
+        "description": "440米长的海上长廊，两侧有铁链护栏和莲花路灯，漫步海上",
+        "duration_min": 30,
+        "order": 2,
+        "highlight": "海上漫步，吹海风看海鸥",
+        "photo_spot": false
+      },
+      {
+        "name": "栈桥海水浴场",
+        "description": "栈桥东侧的免费海水浴场，夏季可下海游泳，沙质细软",
+        "duration_min": 40,
+        "order": 3,
+        "highlight": "夏季下海游泳，沙滩晒太阳",
+        "photo_spot": false
+      },
+      {
+        "name": "中山路",
+        "description": "青岛最古老的商业街，欧式建筑，百年老字号，劈柴院美食街",
+        "duration_min": 30,
+        "order": 4,
+        "highlight": "欧式建筑群，劈柴院吃海鲜",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "八大关",
+        "category": "景点",
+        "description": "青岛最美的街区，万国建筑博览会，花石楼、公主楼，秋季银杏金黄",
+        "distance_m": 2500,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "啤酒博物馆",
+        "category": "景点",
+        "description": "青岛啤酒厂旧址，了解啤酒酿造历史，可品尝原浆啤酒",
+        "distance_m": 3000,
+        "recommended_slot": "上午",
+        "duration_min": 60
+      }
+    ],
+    "best_time": "夏季，傍晚时分看日落，海鸥飞翔；冬季可看海鸥群飞",
+    "avoid_tips": [
+      "夏季人很多，建议早上去",
+      "栈桥免费，但回澜阁需要购票",
+      "海边风大，即使夏天也建议带件外套"
+    ],
+    "lng": 120.307642,
+    "lat": 36.056454,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "天坛",
+    "aliases": [
+      "天坛公园",
+      "北京天坛"
+    ],
+    "city": "北京",
+    "district": "东城区",
+    "level": "5A",
+    "category": "景点",
+    "description": "明清两代帝王祭天、祈谷的场所，中国现存最大的古代祭祀性建筑群，世界文化遗产。祈年殿三重檐圆攒尖顶建筑是北京标志性景观之一。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "祈年殿",
+        "description": "天坛核心建筑，三重檐圆形攒尖顶，蓝色琉璃瓦象征天，明清帝王祈谷场所",
+        "duration_min": 40,
+        "order": 1,
+        "highlight": "北京标志性建筑，最佳拍照机位",
+        "photo_spot": true
+      },
+      {
+        "name": "皇穹宇",
+        "description": "存放祭天神牌的场所，著名的回音壁所在地，声学奇观",
+        "duration_min": 25,
+        "order": 2,
+        "highlight": "回音壁、三音石声学奇观",
+        "photo_spot": true
+      },
+      {
+        "name": "圜丘坛",
+        "description": "帝王祭天的圆形祭坛，三层汉白玉石台，中心天心石声学效应",
+        "duration_min": 20,
+        "order": 3,
+        "highlight": "天心石喊话回声效果",
+        "photo_spot": false
+      },
+      {
+        "name": "丹陛桥",
+        "description": "连接祈年殿和皇穹宇的长甬道，北京著名的银杏大道，秋季金黄",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "秋季银杏大道拍照",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "前门大街",
+        "category": "商业街",
+        "description": "北京著名商业街，老字号云集，铛铛车可体验",
+        "distance_m": 1500,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "大栅栏",
+        "category": "老街",
+        "description": "北京最古老的商业街，同仁堂、瑞蚨祥等老字号",
+        "distance_m": 1800,
+        "recommended_slot": "晚上",
+        "duration_min": 60
+      }
+    ],
+    "best_time": "春秋两季，清晨可看晨练的北京大爷大妈，感受老北京市井生活",
+    "avoid_tips": [
+      "祈年殿内部需单独购票，建议买联票",
+      "回音壁现在有围栏，不能贴墙体验了",
+      "公园很大，建议从南门进北门出，顺路游览"
+    ],
+    "lng": 116.416334,
+    "lat": 39.928359,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "中央大街",
+    "aliases": [
+      "哈尔滨中央大街",
+      "中央大街步行街"
+    ],
+    "city": "哈尔滨",
+    "district": "道里区",
+    "level": "4A",
+    "category": "景点",
+    "description": "哈尔滨最繁华的商业街，亚洲最长的步行街，全长1450米。始建于1898年，街道两侧汇集了文艺复兴、巴洛克、折衷主义及现代多种风格的欧式建筑71栋，被誉为'东方小巴黎'。冬天的冰灯和马迭尔冰棍是标志。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": false,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "中央大街步行街",
+        "description": "步行街主街，方石路面，欧式建筑，各种俄式餐厅和商店",
+        "duration_min": 60,
+        "order": 1,
+        "highlight": "欧式建筑群，方石路拍照",
+        "photo_spot": true
+      },
+      {
+        "name": "马迭尔宾馆",
+        "description": "中央大街标志性建筑，百年历史，马迭尔冰棍是必吃美食",
+        "duration_min": 20,
+        "order": 2,
+        "highlight": "马迭尔冰棍，百年建筑外观",
+        "photo_spot": false
+      },
+      {
+        "name": "圣索菲亚教堂",
+        "description": "远东地区最大的东正教堂，拜占庭风格建筑，哈尔滨标志性建筑",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "教堂广场拍照，喂鸽子",
+        "photo_spot": true
+      },
+      {
+        "name": "防洪纪念塔",
+        "description": "中央大街尽头，松花江畔，为纪念1957年抗洪胜利而建",
+        "duration_min": 15,
+        "order": 4,
+        "highlight": "松花江畔，冬季可看冰雕",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "松花江",
+        "category": "景点",
+        "description": "哈尔滨母亲河，冬季结冰可滑冰、看冬泳，夏季可游船",
+        "distance_m": 200,
+        "recommended_slot": "下午",
+        "duration_min": 60
+      },
+      {
+        "name": "老道外",
+        "category": "老街",
+        "description": "哈尔滨老城区，中华巴洛克建筑街区，更多本地美食",
+        "distance_m": 2000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      }
+    ],
+    "best_time": "冬季12月-次年2月，冰雪大世界期间，整条大街都是冰雕雪雕，氛围感拉满",
+    "avoid_tips": [
+      "冬天非常冷，零下20-30度，一定要做好保暖",
+      "马迭尔冰棍冬天也可以吃，越冷越好吃",
+      "圣索菲亚教堂内部现在是建筑艺术馆，需要购票"
+    ],
+    "lng": 126.617723,
+    "lat": 45.778336,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "拙政园",
+    "aliases": [
+      "苏州拙政园",
+      "拙政园景区"
+    ],
+    "city": "苏州",
+    "district": "姑苏区",
+    "level": "5A",
+    "category": "景点",
+    "description": "中国四大名园之首，江南园林的代表，世界文化遗产。明代御史王献臣归隐后所建，以水为中心，山水萦绕，厅榭精美，花木繁茂，具有浓郁的江南水乡特色。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "东花园",
+        "description": "拙政园东部，以平冈远山、松林草坪、竹坞曲水为主，开阔明快",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "兰雪堂、芙蓉榭拍照",
+        "photo_spot": false
+      },
+      {
+        "name": "中花园",
+        "description": "拙政园核心，以水池为中心，远香堂、小飞虹、香洲等经典建筑",
+        "duration_min": 50,
+        "order": 2,
+        "highlight": "远香堂看荷花，小飞虹廊桥",
+        "photo_spot": true
+      },
+      {
+        "name": "西花园",
+        "description": "拙政园西部，以水廊、倒影楼、与谁同坐轩为主，精致小巧",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "水廊倒影，与谁同坐轩扇面亭",
+        "photo_spot": true
+      },
+      {
+        "name": "苏州园林博物馆",
+        "description": "免费参观，介绍苏州园林历史和造园艺术，帮助理解园林文化",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "了解园林文化，免费",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "平江路",
+        "category": "老街",
+        "description": "苏州保存最完整的历史街区，小桥流水人家，评弹茶馆",
+        "distance_m": 800,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "观前街",
+        "category": "商业街",
+        "description": "苏州最繁华的商业街，玄妙观、采芝斋、黄天源等老字号",
+        "distance_m": 1200,
+        "recommended_slot": "晚上",
+        "duration_min": 60
+      }
+    ],
+    "best_time": "春秋两季，春季杜鹃花展、秋季菊花展是最佳观赏期",
+    "avoid_tips": [
+      "必须提前预约，现场不售票",
+      "建议请讲解，园林的文化内涵需要讲解才能理解",
+      "节假日人很多，建议早上开门就进"
+    ],
+    "lng": 120.628761,
+    "lat": 31.324178,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "橘子洲",
+    "aliases": [
+      "长沙橘子洲",
+      "橘子洲风景区"
+    ],
+    "city": "长沙",
+    "district": "岳麓区",
+    "level": "5A",
+    "category": "景点",
+    "description": "湘江中的一个狭长小岛，全长5公里，是长沙的标志性景点。毛泽东青年时代曾在此游泳、漫步，写下《沁园春·长沙》。岛上的毛泽东青年艺术雕塑高32米，是中国最大的人物雕塑。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "毛泽东青年艺术雕塑",
+        "description": "橘子洲核心景观，高32米、长83米、宽41米，中国最大的人物雕塑",
+        "duration_min": 30,
+        "order": 1,
+        "highlight": "毛主席雕像，必打卡拍照",
+        "photo_spot": true
+      },
+      {
+        "name": "橘子洲头",
+        "description": "橘子洲最南端，望江亭，看湘江南北分流，毛泽东《沁园春·长沙》创作地",
+        "duration_min": 25,
+        "order": 2,
+        "highlight": "望江亭看湘江，问天台",
+        "photo_spot": false
+      },
+      {
+        "name": "橘洲公园",
+        "description": "橘子洲中部，大片草坪和橘园，秋季橘子成熟可采摘",
+        "duration_min": 30,
+        "order": 3,
+        "highlight": "草坪野餐，秋季摘橘子",
+        "photo_spot": false
+      },
+      {
+        "name": "江神庙",
+        "description": "橘子洲北端，佛教寺庙，始建于六朝，为湘江船夫祈福之所",
+        "duration_min": 20,
+        "order": 4,
+        "highlight": "古寺清幽，了解湘江文化",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "太平老街",
+        "category": "老街",
+        "description": "长沙最火的历史街区，臭豆腐、糖油粑粑、茶颜悦色，美食云集",
+        "distance_m": 2000,
+        "recommended_slot": "晚上",
+        "duration_min": 90
+      },
+      {
+        "name": "岳麓山",
+        "category": "景点",
+        "description": "南岳衡山七十二峰之一，岳麓书院、爱晚亭，长沙文化名山",
+        "distance_m": 3000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      }
+    ],
+    "best_time": "春秋两季，秋季橘子成熟时，岛上橘园飘香；建议傍晚去，看湘江日落",
+    "avoid_tips": [
+      "橘子洲很长，建议坐观光小火车，步行全程需要2小时",
+      "周末和节假日人很多，建议工作日前往",
+      "毛泽东雕像在橘子洲中部，不要走到头才发现"
+    ],
+    "lng": 112.948087,
+    "lat": 28.167664,
+    "coordinate_source": "precomputed"
+  },
+  {
+    "name": "秦始皇兵马俑博物馆",
+    "aliases": [
+      "兵马俑",
+      "秦始皇陵兵马俑"
+    ],
+    "city": "西安",
+    "district": "临潼区",
+    "level": "5A",
+    "category": "景点",
+    "description": "世界第八大奇迹，中国第一位皇帝秦始皇的陵墓陪葬坑中出土的陶俑群。",
+    "recommended_duration": 180,
+    "must_visit": true,
+    "hot": true,
+    "tags": [],
+    "inner_route": [
+      {
+        "name": "一号坑",
+        "description": "规模最大，呈长方形，是由步兵和战车组成的主体部队",
+        "duration_min": 60,
+        "order": 1,
+        "highlight": "最壮观，必看",
+        "photo_spot": true
+      },
+      {
+        "name": "二号坑",
+        "description": "由骑兵、战车和步兵组成的多兵种特殊部队",
+        "duration_min": 40,
+        "order": 2,
+        "highlight": "兵种最丰富",
+        "photo_spot": false
+      },
+      {
+        "name": "三号坑",
+        "description": "统帅一、二号坑的指挥机关",
+        "duration_min": 25,
+        "order": 3,
+        "highlight": "指挥部",
+        "photo_spot": false
+      },
+      {
+        "name": "铜车马展厅",
+        "description": "出土的两乘大型彩绘铜车马，被誉为'青铜之冠'",
+        "duration_min": 30,
+        "order": 4,
+        "highlight": "国宝级文物",
+        "photo_spot": true
+      },
+      {
+        "name": "文物陈列厅",
+        "description": "展示兵马俑相关文物和考古发现",
+        "duration_min": 25,
+        "order": 5,
+        "highlight": "",
+        "photo_spot": false
+      }
+    ],
+    "nearby_attractions": [
+      {
+        "name": "华清宫",
+        "category": "景点",
+        "description": "唐代皇家温泉行宫，西安事变发生地",
+        "distance_m": 5000,
+        "recommended_slot": "下午",
+        "duration_min": 120
+      },
+      {
+        "name": "骊山",
+        "category": "景点",
+        "description": "秦岭山脉支脉，风景秀丽",
+        "distance_m": 4000,
+        "recommended_slot": "下午",
+        "duration_min": 90
+      },
+      {
+        "name": "临潼博物馆",
+        "category": "博物馆",
+        "description": "展示临潼地区出土文物",
+        "distance_m": 2000,
+        "recommended_slot": "下午",
+        "duration_min": 60
+      }
+    ],
+    "best_time": "全年皆可，建议请讲解或租讲解器",
+    "avoid_tips": [
+      "建议请讲解员，否则看不懂",
+      "一号坑最壮观，别错过",
+      "馆内不能使用闪光灯"
+    ],
+    "lng": 109.28054,
+    "lat": 34.384731,
+    "coordinate_source": "precomputed"
+  }
+]

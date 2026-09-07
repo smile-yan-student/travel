@@ -1,0 +1,19 @@
+{
+  "id": 8,
+  "name": "大雁塔",
+  "alias": [
+    "大慈恩寺",
+    "大雁塔景区"
+  ],
+  "city": "西安",
+  "district": "雁塔区",
+  "category": "景点",
+  "level": "5A",
+  "description": "唐代玄奘法师为保存经卷而建，是西安的标志性建筑。",
+  "recommended_duration": 120,
+  "best_time": "白天参观，晚上北广场音乐喷泉很壮观",
+  "avoid_tips": [
+    "登塔需另购票",
+    "晚上8点左右有音乐喷泉，可安排傍晚游览"
+  ],
+  "lng": 

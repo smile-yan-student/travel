@@ -1,0 +1,31 @@
+# ============================================================
+# RAG 可选依赖（检索增强生成功能）
+# ============================================================
+# 使用方法：
+#   基础依赖：pip install -r requirements.txt
+#   包含RAG：pip install -r requirements.txt -r requirements-rag.txt
+#   Docker构建：docker build --build-arg INCLUDE_RAG=true .
+#
+# 注意：
+#   - torch 体积较大（约2GB），不需要RAG功能时不安装
+#   - sentence-transformers 会自动下载模型（约100MB）
+#   - 首次运行需要联网下载模型
+# ============================================================
+
+# 向量数据库
+chromadb>=0.4.0,<2.0.0
+
+# 文本向量化
+sentence-transformers>=2.2.0,<4.0.0
+
+# 深度学习框架（sentence-transformers 依赖）
+torch>=2.0.0,<3.0.0
+
+#  Transformers（sentence-transformers 依赖）
+transformers>=4.30.0,<6.0.0
+
+# 数值计算
+numpy>=1.24.0,<3.0.0
+
+# 可选：更快的向量检索（生产环境推荐）
+# hnswlib>=0.7.0

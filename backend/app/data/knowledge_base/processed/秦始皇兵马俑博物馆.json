@@ -1,0 +1,23 @@
+{
+  "id": 7,
+  "name": "秦始皇兵马俑博物馆",
+  "alias": [
+    "兵马俑",
+    "秦始皇陵兵马俑"
+  ],
+  "city": "西安",
+  "district": "临潼区",
+  "category": "景点",
+  "level": "5A",
+  "description": "世界第八大奇迹，中国第一位皇帝秦始皇的陵墓陪葬坑中出土的陶俑群。",
+  "recommended_duration": 180,
+  "best_time": "全年皆可，建议请讲解或租讲解器",
+  "avoid_tips": [
+    "建议请讲解员，否则看不懂",
+    "一号坑最壮观，别错过",
+    "馆内不能使用闪光灯"
+  ],
+  "lng": null,
+  "lat": null,
+  "is_active": 1,
+  "created_at": 

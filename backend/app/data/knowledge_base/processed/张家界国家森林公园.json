@@ -1,0 +1,23 @@
+{
+  "id": 16,
+  "name": "张家界国家森林公园",
+  "alias": [
+    "张家界",
+    "武陵源"
+  ],
+  "city": "张家界",
+  "district": "武陵源区",
+  "category": "景点",
+  "level": "5A",
+  "description": "中国第一个国家森林公园，世界自然遗产，以峰林地貌著称，《阿凡达》取景地。",
+  "recommended_duration": 480,
+  "best_time": "春秋最佳，雨后云雾缭绕如仙境",
+  "avoid_tips": [
+    "景区很大，建议安排2天",
+    "山上物价较高，可自带干粮",
+    "百龙天梯和索道需排队，建议早上去"
+  ],
+  "lng": null,
+  "lat": null,
+  "is_active": 1,
+  "created_at": 

@@ -1,0 +1,18 @@
+{
+  "id": 4,
+  "name": "天安门广场",
+  "alias": [
+    "天安门"
+  ],
+  "city": "北京",
+  "district": "东城区",
+  "category": "景点",
+  "level": "5A",
+  "description": "世界上最大的城市广场之一，中华人民共和国的象征。",
+  "recommended_duration": 90,
+  "best_time": "清晨看升旗，白天参观，夜景也很美",
+  "avoid_tips": [
+    "升旗时间随日出变化，需提前查询",
+    "进入广场需安检，带好身份证"
+  ],
+  "lng": 

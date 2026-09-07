@@ -1,0 +1,21 @@
+{
+  "session_id": "d62dd2fe0eb5497a",
+  "created_at": 1787959533.132989,
+  "updated_at": 1787959533.132989,
+  "original_params": {},
+  "current_plan": {},
+  "preferences": {
+    "pace_preference": null,
+    "food_preference": null,
+    "paid_attitude": null,
+    "early_rise_preference": null,
+    "theme_preferences": [],
+    "crowd_preference": null,
+    "transport_preference": null,
+    "custom_notes": []
+  },
+  "modification_history": [],
+  "status": "draft",
+  "source": "",
+  "recent_instructions": []
+}

@@ -1,0 +1,31 @@
+{
+  "user_id": 10,
+  "username": "",
+  "preferences": {
+    "pace_preference": "适中",
+    "budget_preference": "适中",
+    "group_type": "情侣",
+    "style_preferences": [
+      "综合"
+    ],
+    "traffic_preference": "公共交通",
+    "early_rise": null,
+    "food_lover": null,
+    "paid_attitude": null,
+    "crowd_preference": null,
+    "physical_level": null,
+    "humanities_interest": null,
+    "photography_interest": null,
+    "shopping_interest": null,
+    "nightlife_interest": null,
+    "total_plans": 3,
+    "total_modifications": 0,
+    "favorite_destinations": [
+      "大明湖"
+    ],
+    "last_plan_time": 1787964178.666993,
+    "custom_notes": []
+  },
+  "created_at": 1787963423.0087192,
+  "updated_at": 1787964178.6669939
+}

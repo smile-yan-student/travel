@@ -1,0 +1,31 @@
+{
+  "user_id": 20,
+  "username": "",
+  "preferences": {
+    "pace_preference": "适中",
+    "budget_preference": "适中",
+    "group_type": "单人",
+    "style_preferences": [
+      "综合"
+    ],
+    "traffic_preference": "公共交通",
+    "early_rise": null,
+    "food_lover": null,
+    "paid_attitude": null,
+    "crowd_preference": null,
+    "physical_level": null,
+    "humanities_interest": null,
+    "photography_interest": null,
+    "shopping_interest": null,
+    "nightlife_interest": null,
+    "total_plans": 1,
+    "total_modifications": 0,
+    "favorite_destinations": [
+      "北京"
+    ],
+    "last_plan_time": 1788226146.738084,
+    "custom_notes": []
+  },
+  "created_at": 1788226146.738071,
+  "updated_at": 1788226146.738084
+}

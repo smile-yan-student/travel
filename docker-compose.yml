@@ -1,0 +1,173 @@
+# ============================================================
+# Docker Compose - 旅行规划应用
+# ============================================================
+# 使用方法：
+#   1. 复制 .env.example 为 .env 并填写配置
+#   2. 基础版（无RAG）：docker-compose up -d --build
+#   3. 完整版（含RAG）：docker-compose --profile rag up -d --build
+#      或设置 INCLUDE_RAG=true 后 docker-compose up -d --build
+# ============================================================
+
+version: "3.8"
+
+services:
+  # ============================================================
+  # MySQL 数据库
+  # ============================================================
+  mysql:
+    image: mysql:8.0
+    container_name: travel-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-travel}
+      MYSQL_USER: ${MYSQL_USER:-travel}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-travelpassword}
+      TZ: Asia/Shanghai
+      # 字符集配置
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --innodb_buffer_pool_size=256M
+      --max_connections=200
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # 注意：表结构由应用启动时自动创建（database.py 的 init_db()）
+      # 如需自定义初始化脚本，可挂载到 /docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - travel-network
+
+  # ============================================================
+  # 后端服务 - FastAPI
+  # ============================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        # 是否包含 RAG 依赖（true/false）
+        # 注意：包含 RAG 会增加镜像体积约 2GB（torch）
+        INCLUDE_RAG: ${INCLUDE_RAG:-false}
+    container_name: travel-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      ENV: prod
+      # 数据库配置（使用docker内部网络，host为mysql）
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-travel}
+      DB_USER: ${MYSQL_USER:-travel}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-travelpassword}
+      # 应用配置
+      SECRET_KEY: ${SECRET_KEY:-please-change-this-to-a-random-secret-key}
+      APP_PORT: 8000
+      # CORS
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://127.0.0.1}
+      # AI配置
+      AI_PROVIDER: ${AI_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.deepseek.com/v1}
+      AI_MODEL: ${AI_MODEL:-deepseek-chat}
+      # 地图配置
+      MAP_PROVIDER: ${MAP_PROVIDER:-tencent}
+      TENCENT_MAP_KEY: ${TENCENT_MAP_KEY:-}
+      TENCENT_MAP_SK: ${TENCENT_MAP_SK:-}
+      AMAP_KEY: ${AMAP_KEY:-}
+      # 邮箱配置
+      EMAIL_ENABLED: ${EMAIL_ENABLED:-false}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      # RAG 配置
+      RAG_ENABLED: ${RAG_ENABLED:-false}
+      RAG_DATA_DIR: /app/data/knowledge_base
+      RAG_MODEL_NAME: ${RAG_MODEL_NAME:-BAAI/bge-small-zh-v1.5}
+      # 日志
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_DIR: /app/logs
+      # 等待 MySQL 配置
+      MAX_RETRIES: ${MAX_RETRIES:-30}
+      RETRY_DELAY: ${RETRY_DELAY:-2}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - backend_logs:/app/logs
+      - rag_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - travel-network
+
+  # ============================================================
+  # 前端服务 - Vue 3 + Nginx
+  # ============================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+        VITE_AMAP_WEB_KEY: ${VITE_AMAP_WEB_KEY:-}
+    container_name: travel-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - travel-network
+
+# ============================================================
+# 数据卷
+# ============================================================
+volumes:
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MYSQL_DATA_DIR:-./data/mysql}
+  backend_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOG_DATA_DIR:-./data/logs}
+  rag_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${RAG_DATA_DIR:-./data/rag}
+
+# ============================================================
+# 网络
+# ============================================================
+networks:
+  travel-network:
+    driver: bridge

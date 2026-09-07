@@ -1,0 +1,7 @@
+export const GROUP_TYPES = ['单人', '情侣', '亲子', '家庭', '朋友', '老人']
+export const BUDGET_LEVELS = ['经济', '适中', '舒适', '奢华']
+export const STYLES = ['美食', '人文', '网红', '小众', '亲子', '自然']
+export const PACES = ['轻松', '适中', '暴走']
+export const TRAFFIC_MODES = ['混合', '自驾', '公共交通']
+export const INTERESTS = ['博物馆', '夜景', '美食', '购物', '摄影', '自然', '古城', '亲子乐园', '温泉', '演出']
+export const POPULAR_CITIES = ['杭州', '北京', '上海', '成都', '西安', '广州', '南京', '重庆', '长沙', '厦门', '大理', '三亚', '济南', '青岛', '苏州', '武汉']

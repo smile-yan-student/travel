@@ -1,0 +1,1627 @@
+"""行程规划引擎：AI 生成 + 规则引擎兜底 + 高德路径/预算增强。
+
+渐进式拆分中：常量已迁移到 services/planner/utils.py，
+工具函数/地理枚举/必去地标/聚类/逐日构建等模块待后续拆分。
+"""
+import asyncio
+import datetime
+import time
+import uuid
+from typing import List, Optional
+
+from . import ai as ai_mod
+from . import amap
+from . import logger as log_mod
+from .config import settings
+from .models import DayPlan, PlanItem, PlanRequest, PlanResponse, POI
+from .services.planner.utils import (
+    SLOT_ORDER, SLOT_TIME, BUDGET_TABLE, PACE_ITEMS, GROUP_PACE,
+    DEPARTURE_MESSAGES, DAILY_INSPIRATIONS,
+)
+from .services.planner.planner_constants import (
+    SCOPE_KEYWORDS, CLUSTER_MAX_DIST, SCOPE_MAX_RANGE,
+    CLOSED_MARKERS, AUX_FOOD_BAD_NAMES, LANDMARK_WORDS,
+)
+from .services.planner.geo_enum import (
+    is_in_china as _is_in_china,
+    load_province_best_season as _load_province_best_season,
+    resolve_province as _resolve_province,
+    months_str as _months_str,
+    is_province as _is_province,
+    scope_attrs as _scope_attrs,
+    enumerate_scoped_attractions as _enumerate_scoped_attractions,
+)
+
+_planner_logger = log_mod.get_logger("planner")
+
+
+def _is_in_china(geo: dict) -> bool:
+    """判断地理编码结果是否在中国境内（含港澳台）。
+
+    判断优先级：
+    1. 本地命中（source=local）：本地行政区域库只有中国数据，默认中国
+    2. 第三方返回 province 字段非空：高德/腾讯返回中国地址时 province 有值
+    3. 经纬度范围判断：中国大致范围 73°-135.5°E, 17.5°-54°N（含港澳台及南海诸岛）
+    """
+    if not geo:
+        return False
+    # 1) 本地命中：只有中国数据
+    if geo.get("source") == "local":
+        return True
+    # 2) province 非空
+    if geo.get("province"):
+        return True
+    # 3) 经纬度范围（含港澳台、南海诸岛）
+    lng = geo.get("lng")
+    lat = geo.get("lat")
+    if lng is not None and lat is not None:
+        return 73.0 <= float(lng) <= 135.5 and 17.5 <= float(lat) <= 54.0
+    return False
+
+
+# ========== 大时间跨度（月/年）规划：按省/月合理分配 ==========
+
+_PROVINCE_SEASON_CACHE = None
+
+
+def _load_province_best_season() -> dict:
+    """加载省份最佳出行月份知识库（34个省级行政区）"""
+    global _PROVINCE_SEASON_CACHE
+    if _PROVINCE_SEASON_CACHE is not None:
+        return _PROVINCE_SEASON_CACHE
+    try:
+        from pathlib import Path
+        path = Path(__file__).resolve().parent / "data" / "province_best_season.json"
+        if path.exists():
+            import json
+            data = json.loads(path.read_text(encoding="utf-8"))
+            # 去掉 _comment 等非省份键
+            _PROVINCE_SEASON_CACHE = {k: v for k, v in data.items() if not k.startswith("_")}
+        else:
+            _PROVINCE_SEASON_CACHE = {}
+    except Exception:
+        _PROVINCE_SEASON_CACHE = {}
+    return _PROVINCE_SEASON_CACHE
+
+
+def _resolve_province(destination: str, geo: dict) -> str:
+    """确定目的地所属省级行政区名称。
+
+    优先级：geo.province → 本地行政区域库 lookup（向上追溯到省级）→ 常见城市→省映射 → destination 本身
+    """
+    # 1) geocode 返回的 province
+    prov = (geo or {}).get("province", "")
+    if prov:
+        return prov
+    # 2) 本地行政区域库：从目的地向上追溯到省级
+    try:
+        from . import geo_local
+        entry = geo_local.lookup(destination)
+        if entry:
+            if entry.get("level") == "province":
+                return entry["name"]
+            parent = entry.get("parent")
+            visited = set()
+            while parent and parent not in visited:
+                visited.add(parent)
+                p_entry = geo_local.lookup(parent)
+                if p_entry:
+                    if p_entry.get("level") == "province":
+                        return p_entry["name"]
+                    parent = p_entry.get("parent")
+                else:
+                    break
+    except Exception:
+        pass
+    # 3) 常见旅游城市→省份映射（覆盖本地数据 parent 缺失的情况）
+    CITY_TO_PROVINCE = {
+        "北京": "北京市", "天津": "天津市", "上海": "上海市", "重庆": "重庆市",
+        "杭州": "浙江省", "宁波": "浙江省", "温州": "浙江省", "绍兴": "浙江省", "嘉兴": "浙江省", "金华": "浙江省", "台州": "浙江省", "湖州": "浙江省", "丽水": "浙江省", "衢州": "浙江省", "舟山": "浙江省",
+        "南京": "江苏省", "苏州": "江苏省", "无锡": "江苏省", "常州": "江苏省", "徐州": "江苏省", "南通": "江苏省", "扬州": "江苏省", "镇江": "江苏省", "泰州": "江苏省", "盐城": "江苏省", "淮安": "江苏省", "连云港": "江苏省", "宿迁": "江苏省",
+        "成都": "四川省", "绵阳": "四川省", "乐山": "四川省", "宜宾": "四川省", "泸州": "四川省", "南充": "四川省", "德阳": "四川省", "自贡": "四川省", "攀枝花": "四川省", "广元": "四川省", "遂宁": "四川省", "内江": "四川省", "乐山": "四川省", "南充": "四川省", "眉山": "四川省", "宜宾": "四川省", "广安": "四川省", "达州": "四川省", "雅安": "四川省", "巴中": "四川省", "资阳": "四川省", "阿坝": "四川省", "甘孜": "四川省", "凉山": "四川省",
+        "西安": "陕西省", "咸阳": "陕西省", "宝鸡": "陕西省", "渭南": "陕西省", "延安": "陕西省", "汉中": "陕西省", "安康": "陕西省", "商洛": "陕西省", "铜川": "陕西省",
+        "武汉": "湖北省", "宜昌": "湖北省", "襄阳": "湖北省", "荆州": "湖北省", "黄冈": "湖北省", "十堰": "湖北省", "孝感": "湖北省", "荆门": "湖北省", "鄂州": "湖北省", "黄石": "湖北省", "咸宁": "湖北省", "随州": "湖北省", "恩施": "湖北省",
+        "长沙": "湖南省", "张家界": "湖南省", "岳阳": "湖南省", "湘潭": "湖南省", "株洲": "湖南省", "衡阳": "湖南省", "常德": "湖南省", "益阳": "湖南省", "郴州": "湖南省", "永州": "湖南省", "怀化": "湖南省", "娄底": "湖南省", "邵阳": "湖南省", "湘西": "湖南省",
+        "广州": "广东省", "深圳": "广东省", "珠海": "广东省", "汕头": "广东省", "佛山": "广东省", "韶关": "广东省", "湛江": "广东省", "肇庆": "广东省", "江门": "广东省", "茂名": "广东省", "惠州": "广东省", "梅州": "广东省", "汕尾": "广东省", "河源": "广东省", "阳江": "广东省", "清远": "广东省", "东莞": "广东省", "中山": "广东省", "潮州": "广东省", "揭阳": "广东省", "云浮": "广东省",
+        "厦门": "福建省", "福州": "福建省", "泉州": "福建省", "漳州": "福建省", "莆田": "福建省", "龙岩": "福建省", "三明": "福建省", "南平": "福建省", "宁德": "福建省",
+        "青岛": "山东省", "济南": "山东省", "烟台": "山东省", "威海": "山东省", "潍坊": "山东省", "临沂": "山东省", "济宁": "山东省", "淄博": "山东省", "泰安": "山东省", "日照": "山东省", "东营": "山东省", "滨州": "山东省", "德州": "山东省", "聊城": "山东省", "菏泽": "山东省", "枣庄": "山东省",
+        "郑州": "河南省", "洛阳": "河南省", "开封": "河南省", "南阳": "河南省", "新乡": "河南省", "安阳": "河南省", "焦作": "河南省", "平顶山": "河南省", "许昌": "河南省", "漯河": "河南省", "三门峡": "河南省", "南阳": "河南省", "商丘": "河南省", "信阳": "河南省", "周口": "河南省", "驻马店": "河南省", "济源": "河南省", "鹤壁": "河南省", "濮阳": "河南省",
+        "昆明": "云南省", "大理": "云南省", "丽江": "云南省", "西双版纳": "云南省", "香格里拉": "云南省", "腾冲": "云南省", "玉溪": "云南省", "曲靖": "云南省", "保山": "云南省", "昭通": "云南省", "普洱": "云南省", "临沧": "云南省", "楚雄": "云南省", "红河": "云南省", "文山": "云南省", "西双版纳": "云南省", "大理": "云南省", "德宏": "云南省", "怒江": "云南省", "迪庆": "云南省",
+        "贵阳": "贵州省", "遵义": "贵州省", "安顺": "贵州省", "毕节": "贵州省", "铜仁": "贵州省", "六盘水": "贵州省", "黔东南": "贵州省", "黔南": "贵州省", "黔西南": "贵州省",
+        "南宁": "广西壮族自治区", "桂林": "广西壮族自治区", "柳州": "广西壮族自治区", "北海": "广西壮族自治区", "玉林": "广西壮族自治区", "梧州": "广西壮族自治区", "钦州": "广西壮族自治区", "防城港": "广西壮族自治区", "贵港": "广西壮族自治区", "百色": "广西壮族自治区", "贺州": "广西壮族自治区", "河池": "广西壮族自治区", "来宾": "广西壮族自治区", "崇左": "广西壮族自治区",
+        "哈尔滨": "黑龙江省", "长春": "吉林省", "沈阳": "辽宁省", "大连": "辽宁省", "鞍山": "辽宁省", "抚顺": "辽宁省", "本溪": "辽宁省", "丹东": "辽宁省", "锦州": "辽宁省", "营口": "辽宁省", "阜新": "辽宁省", "辽阳": "辽宁省", "盘锦": "辽宁省", "铁岭": "辽宁省", "朝阳": "辽宁省", "葫芦岛": "辽宁省",
+        "呼和浩特": "内蒙古自治区", "包头": "内蒙古自治区", "鄂尔多斯": "内蒙古自治区", "赤峰": "内蒙古自治区", "通辽": "内蒙古自治区", "呼伦贝尔": "内蒙古自治区", "乌兰察布": "内蒙古自治区", "巴彦淖尔": "内蒙古自治区", "乌海": "内蒙古自治区", "兴安盟": "内蒙古自治区", "锡林郭勒盟": "内蒙古自治区", "阿拉善盟": "内蒙古自治区",
+        "兰州": "甘肃省", "敦煌": "甘肃省", "嘉峪关": "甘肃省", "天水": "甘肃省", "白银": "甘肃省", "武威": "甘肃省", "张掖": "甘肃省", "平凉": "甘肃省", "酒泉": "甘肃省", "庆阳": "甘肃省", "定西": "甘肃省", "陇南": "甘肃省", "临夏": "甘肃省", "甘南": "甘肃省", "金昌": "甘肃省",
+        "西宁": "青海省", "海东": "青海省", "海北": "青海省", "黄南": "青海省", "海南州": "青海省", "果洛": "青海省", "玉树": "青海省", "海西": "青海省",
+        "银川": "宁夏回族自治区", "石嘴山": "宁夏回族自治区", "吴忠": "宁夏回族自治区", "固原": "宁夏回族自治区", "中卫": "宁夏回族自治区",
+        "乌鲁木齐": "新疆维吾尔自治区", "喀什": "新疆维吾尔自治区", "伊犁": "新疆维吾尔自治区", "吐鲁番": "新疆维吾尔自治区", "哈密": "新疆维吾尔自治区", "昌吉": "新疆维吾尔自治区", "博尔塔拉": "新疆维吾尔自治区", "巴音郭楞": "新疆维吾尔自治区", "阿克苏": "新疆维吾尔自治区", "克孜勒苏": "新疆维吾尔自治区", "和田": "新疆维吾尔自治区", "塔城": "新疆维吾尔自治区", "阿勒泰": "新疆维吾尔自治区", "石河子": "新疆维吾尔自治区", "阿拉尔": "新疆维吾尔自治区", "图木舒克": "新疆维吾尔自治区", "五家渠": "新疆维吾尔自治区",
+        "拉萨": "西藏自治区", "日喀则": "西藏自治区", "昌都": "西藏自治区", "林芝": "西藏自治区", "山南": "西藏自治区", "那曲": "西藏自治区", "阿里": "西藏自治区",
+        "三亚": "海南省", "海口": "海南省", "三沙": "海南省", "儋州": "海南省", "五指山": "海南省", "琼海": "海南省", "文昌": "海南省", "万宁": "海南省", "东方": "海南省", "定安": "海南省", "屯昌": "海南省", "澄迈": "海南省", "临高": "海南省", "白沙": "海南省", "昌江": "海南省", "乐东": "海南省", "陵水": "海南省", "保亭": "海南省", "琼中": "海南省",
+        "香港": "香港特别行政区", "澳门": "澳门特别行政区", "台北": "台湾省", "高雄": "台湾省", "台中": "台湾省", "台南": "台湾省",
+        "石家庄": "河北省", "唐山": "河北省", "秦皇岛": "河北省", "邯郸": "河北省", "邢台": "河北省", "保定": "河北省", "张家口": "河北省", "承德": "河北省", "沧州": "河北省", "廊坊": "河北省", "衡水": "河北省",
+        "太原": "山西省", "大同": "山西省", "平遥": "山西省", "运城": "山西省", "临汾": "山西省", "晋中": "山西省", "长治": "山西省", "晋城": "山西省", "朔州": "山西省", "忻州": "山西省", "吕梁": "山西省", "阳泉": "山西省",
+        "合肥": "安徽省", "黄山": "安徽省", "芜湖": "安徽省", "蚌埠": "安徽省", "淮南": "安徽省", "马鞍山": "安徽省", "淮北": "安徽省", "铜陵": "安徽省", "安庆": "安徽省", "黄山": "安徽省", "滁州": "安徽省", "阜阳": "安徽省", "宿州": "安徽省", "六安": "安徽省", "亳州": "安徽省", "池州": "安徽省", "宣城": "安徽省",
+        "南昌": "江西省", "九江": "江西省", "景德镇": "江西省", "萍乡": "江西省", "新余": "江西省", "鹰潭": "江西省", "赣州": "江西省", "吉安": "江西省", "宜春": "江西省", "抚州": "江西省", "上饶": "江西省",
+    }
+    # 模糊匹配：目的地以某个城市名开头
+    for city, prov_name in CITY_TO_PROVINCE.items():
+        if destination.startswith(city) or city in destination:
+            return prov_name
+    # 4) destination 本身（可能就是省级）
+    return destination
+
+
+def _build_long_span_summary(req: PlanRequest, province: str) -> dict:
+    """生成大时间跨度（月/年）的月度分配摘要。
+
+    规则：
+    - 月级（1个月）：当前省或临近省，1个省
+    - 月级（2个月）：2个省（当前省+最佳临近省）
+    - 年级（1年）：12个月，每月一个省，按最佳出行月份分配
+
+    返回 {unit, total_months, months: [{month, province, reason, best_for}]}
+    """
+    season_data = _load_province_best_season()
+    span_unit = req.span_unit
+    span_value = req.span_value
+
+    # 标准化省份名（去掉"省"/"市"/"自治区"等后缀用于匹配）
+    def _match_province(name: str) -> str:
+        """在 season_data 中匹配省份名（支持简称/全称）"""
+        if name in season_data:
+            return name
+        for suffix in ["省", "市", "自治区", "壮族自治区", "回族自治区", "维吾尔自治区"]:
+            if name.endswith(suffix):
+                base = name[: -len(suffix)]
+                for k in season_data:
+                    if k.startswith(base) or base in k:
+                        return k
+        # 模糊匹配
+        for k in season_data:
+            if name in k or k in name:
+                return k
+        return ""
+
+    current_province = _match_province(province) or province
+
+    if span_unit == "month":
+        # 月级：1个月=1个省，2个月=2个省
+        n_provinces = min(max(span_value, 1), 3)  # 最多3个月/3个省
+        months = []
+        # 第一个月：当前省
+        info = season_data.get(current_province, {})
+        months.append({
+            "month": 1,
+            "province": current_province,
+            "reason": f"出发地所在省，{info.get('reason', '适合深度游览')}",
+            "best_for": _months_str(info.get("best_months", [])),
+        })
+        # 后续月份：选择最佳临近省（按最佳月份排序）
+        if n_provinces > 1:
+            candidates = [(k, v) for k, v in season_data.items() if k != current_province]
+            # 简单策略：按省份名称排序（后续可优化为地理临近）
+            candidates.sort(key=lambda x: x[0])
+            for i in range(1, n_provinces):
+                if i - 1 < len(candidates):
+                    k, v = candidates[i - 1]
+                    months.append({
+                        "month": i + 1,
+                        "province": k,
+                        "reason": v.get("reason", "适合深度游览"),
+                        "best_for": _months_str(v.get("best_months", [])),
+                    })
+        return {
+            "unit": "month",
+            "total_months": n_provinces,
+            "current_province": current_province,
+            "months": months,
+            "tip": f"每月深度游览一个省，每省约{req.days}天精华行程，避免行程过于庞杂。",
+        }
+
+    elif span_unit == "year":
+        # 年级：12个月，每月一个省，按最佳出行月份分配
+        all_provinces = list(season_data.items())
+        # 为每个月分配最佳省份
+        months = []
+        used_provinces = set()
+        # 第一个月优先当前省
+        if current_province in season_data:
+            used_provinces.add(current_province)
+            info = season_data[current_province]
+            months.append({
+                "month": 1,
+                "province": current_province,
+                "reason": f"出发地所在省，{info.get('reason', '适合深度游览')}",
+                "best_for": _months_str(info.get("best_months", [])),
+            })
+        # 为第2-12个月分配：选择该月最佳且未使用的省份
+        for month in range(2, 13):
+            # 该月最佳的省份（best_months 包含该月，且未使用）
+            best = [(k, v) for k, v in all_provinces
+                    if k not in used_provinces and month in (v.get("best_months") or [])]
+            if not best:
+                # 该月没有最佳省份，选任意未使用的
+                best = [(k, v) for k, v in all_provinces if k not in used_provinces]
+            if best:
+                # 按 best_months 数量排序（最佳月份多的优先）
+                best.sort(key=lambda x: -len(x[1].get("best_months") or []))
+                k, v = best[0]
+                used_provinces.add(k)
+                months.append({
+                    "month": month,
+                    "province": k,
+                    "reason": v.get("reason", "适合深度游览"),
+                    "best_for": _months_str(v.get("best_months", [])),
+                })
+        return {
+            "unit": "year",
+            "total_months": 12,
+            "current_province": current_province,
+            "months": months,
+            "tip": "全年12个月，每月深度游览一个省，按各省最佳出行季节分配，避开极端天气。",
+        }
+
+    # 天/周级：不生成月度摘要
+    return {}
+
+
+def _months_str(months: list) -> str:
+    """把月份列表转成可读字符串，如 [3,4,5,10,11] → '3-5月、10-11月'"""
+    if not months:
+        return "全年"
+    sorted_m = sorted(months)
+    ranges = []
+    start = sorted_m[0]
+    end = sorted_m[0]
+    for m in sorted_m[1:]:
+        if m == end + 1:
+            end = m
+        else:
+            ranges.append((start, end))
+            start = m
+            end = m
+    ranges.append((start, end))
+    parts = []
+    for s, e in ranges:
+        if s == e:
+            parts.append(f"{s}月")
+        else:
+            parts.append(f"{s}-{e}月")
+    return "、".join(parts)
+
+
+async def build_plan(req: PlanRequest) -> PlanResponse:
+    request_id = uuid.uuid4().hex[:12]
+    start = time.time()
+    destination = req.destination.strip()
+    _planner_logger.info("plan_start", extra={"fields": {
+        "request_id": request_id, "destination": destination, "days": req.days,
+        "travelers": req.travelers, "group_type": req.group_type,
+        "budget_level": req.budget_level, "style": req.style, "pace": req.pace,
+        "traffic_mode": req.traffic_mode,
+    }})
+
+    # 1) 定位城市中心
+    geo = await amap.geocode(destination)
+    if not geo:
+        _planner_logger.warning("plan_rejected_unknown_destination", extra={"fields": {
+            "request_id": request_id, "destination": destination,
+        }})
+        return PlanResponse(
+            request_id=request_id, destination=destination,
+            city_center={"lng": 0, "lat": 0},
+            days=0, origin=req.origin, travelers=req.travelers,
+            return_point=req.return_point, group_type=req.group_type,
+            budget_level=req.budget_level, style=req.style, pace=req.pace,
+            traffic_mode=req.traffic_mode, daily_start_time=req.daily_start_time,
+            ai_model="(规则引擎)", source="rejected",
+            weather={}, departure_message=f"抱歉，无法识别目的地「{destination}」，请检查地名是否正确，或尝试更具体的地址（如「杭州市西湖区」）。",
+            day_plans=[], all_pois=[], total_budget=0, budget_breakdown={},
+            generated_at=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+    center = {"lng": geo["lng"], "lat": geo["lat"]}
+
+    # 1.5) 中国区域校验：仅规划中国境内目的地
+    if not _is_in_china(geo):
+        _planner_logger.warning("plan_rejected_outside_china", extra={"fields": {
+            "request_id": request_id, "destination": destination,
+            "lng": geo.get("lng"), "lat": geo.get("lat"),
+            "source": geo.get("source"), "province": geo.get("province", ""),
+        }})
+        return PlanResponse(
+            request_id=request_id, destination=destination, city_center=center,
+            days=0, origin=req.origin, travelers=req.travelers,
+            return_point=req.return_point, group_type=req.group_type,
+            budget_level=req.budget_level, style=req.style, pace=req.pace,
+            traffic_mode=req.traffic_mode, daily_start_time=req.daily_start_time,
+            ai_model="(规则引擎)", source="rejected",
+            weather={}, departure_message=f"抱歉，「{destination}」位于中国境外，当前暂不支持中国以外目的地的行程规划。我们的足迹先从祖国的大好河山开始吧～",
+            day_plans=[], all_pois=[], total_budget=0, budget_breakdown={},
+            generated_at=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        )
+
+    # 2) 检索候选 POI（美食 / 购物 / 夜生活辅助池 + 通用候选），并应用排除规则
+    pois = await amap.search_pois(destination, center, ["景点", "美食", "购物", "夜生活"])
+    if not pois:
+        pois = _fallback_pois(center, destination)
+    if req.exclude_poi:
+        exclude_names = {n.strip() for n in req.exclude_poi if n.strip()}
+        pois = [p for p in pois if p["name"] not in exclude_names]
+
+    # 3) 天气
+    weather = await amap.weather(destination, geo.get("adcode", ""))
+
+    # 4) 行政分级枚举景点：区/县 → 市 → 省，景点构成主线
+    attrs = await _enumerate_scoped_attractions(geo, center)
+    # 4.1) 知识库「必打卡」地标注入（提前：让时间跨度收束与规划都基于完整景点池）
+    attrs = await _inject_must_visit_attrs(req.destination, attrs)
+    if req.exclude_poi:
+        exclude_names = {n.strip() for n in req.exclude_poi if n.strip()}
+        attrs = [p for p in attrs if p["name"] not in exclude_names]
+
+    # 4.5) 时间跨度合理性收束：按实际可支撑的区域（市/聚类区）数上限收束天数，
+    #      避免「规划点不足（天数多于可去地点）」或「过于庞杂（天数远超可分配区域）」。
+    #      年/月/日维度的归一化与 15 天上限已在意图层完成，这里按资源再收一次。
+    is_prov = _is_province(geo)
+    if attrs:
+        if is_prov:
+            n_regions = len({(p.get("cityname") or "").replace("市", "").strip()
+                             for p in attrs if p.get("cityname")}) or 1
+        else:
+            n_regions = max(1, len(_cluster_attractions(attrs)))
+        if req.days > n_regions:
+            req.days = n_regions
+
+    # 4.8) LLM 智能优化：POI 筛选 + 主题分组 + 建议时长（LLM 做决策，规则做执行）
+    llm_optimized = None
+    if ai_mod.ai_available() and attrs:
+        llm_optimized = await ai_mod.optimize_itinerary(req.model_dump(), attrs)
+        if llm_optimized:
+            selected_names = {item["name"] for item in llm_optimized}
+            opt_by_name = {item["name"]: item for item in llm_optimized}
+            # 第一部分：LLM 选中的景点（注入优化字段，优先规划）
+            selected = []
+            for p in attrs:
+                if p["name"] in selected_names:
+                    opt = opt_by_name[p["name"]]
+                    p["llm_duration"] = opt["duration_min"]
+                    p["llm_theme"] = opt["theme"]
+                    p["llm_best_slot"] = opt["best_slot"]
+                    p["llm_reason"] = opt.get("reason", "")
+                    selected.append(p)
+            # 第二部分：如果 LLM 选中的不足，从 hot 景点中补充（按评分排序，不注入优化字段）
+            min_needed = req.days * 2
+            max_total = req.days * 5
+            if len(selected) < min_needed:
+                used_ids = {p["id"] for p in selected}
+                supplements = [p for p in attrs if p.get("hot") and p["id"] not in used_ids]
+                supplements.sort(key=lambda x: -float(x.get("rating", 0) or 0))
+                selected.extend(supplements[:min_needed - len(selected)])
+            # 总数控制
+            filtered_attrs = selected[:max_total]
+            if len(filtered_attrs) >= min_needed:
+                _planner_logger.info("llm_optimize_applied", extra={"fields": {
+                    "request_id": request_id, "original_count": len(attrs),
+                    "filtered_count": len(filtered_attrs),
+                    "llm_selected": len(selected_names),
+                    "themes": list({p.get("llm_theme", "") for p in filtered_attrs if p.get("llm_theme")}),
+                }})
+                attrs = filtered_attrs
+            else:
+                _planner_logger.info("llm_optimize_skipped", extra={"fields": {
+                    "request_id": request_id, "reason": "筛选后景点不足",
+                    "filtered_count": len(filtered_attrs), "min_needed": min_needed,
+                }})
+
+    # 5) 规则化地理规划：聚类成区域 → 短距同日 → 跨天不重复；美食/购物/夜生活只做就近辅助
+    day_plans, model_used, source = await _geo_plan(req, center, pois, attrs, is_province=is_prov)
+
+    if not day_plans:
+        # 极端兜底：直接生成最简单的一天
+        day_plans = await _emergency_plan(req, center, pois)
+
+    # 6) 天数不足时用规则引擎补齐（候选池 = 景点 + 辅助池）
+    all_candidates = attrs + [p for p in pois if p["id"] not in {a["id"] for a in attrs}]
+    day_plans = await _ensure_days(req, center, all_candidates, day_plans)
+
+    # 6.5) 按序重编天数（保证 1..N 连续）
+    for i, dp in enumerate(day_plans):
+        dp.day = i + 1
+        dp.date_label = _date_label(i + 1, req.days)
+
+    # 6.6) 跨天地域去重：仅对非 geo 路径生效（geo 路径已按子区域天然不重复）
+    if source != "geo":
+        day_plans = await _enforce_region_distinct(req, center, all_candidates, day_plans)
+
+    used_poi_ids = {it.poi.id for dp in day_plans for it in dp.items}
+    known = {p["id"]: p for p in all_candidates}
+    known.update({it.poi.id: it.poi.model_dump() for dp in day_plans for it in dp.items})
+
+    # 7) 汇总
+    all_pois = [POI(**known[i]) for i in used_poi_ids]
+    total_budget = round(sum(dp.budget for dp in day_plans), 1)
+    budget_breakdown = _total_breakdown(day_plans)
+    duration_ms = round((time.time() - start) * 1000, 2)
+    _planner_logger.info("plan_done", extra={"fields": {
+        "request_id": request_id, "destination": destination, "days": req.days,
+        "poi_count": len(all_pois), "day_count": len(day_plans),
+        "total_budget": total_budget, "source": source, "ai_model": model_used,
+        "duration_ms": duration_ms,
+    }})
+
+    # 大时间跨度（月/年）：生成月度分配摘要，按省/月合理分配
+    span_summary = {}
+    if req.span_unit in ("month", "year") and req.span_value >= 1:
+        province = _resolve_province(destination, geo)
+        span_summary = _build_long_span_summary(req, province)
+        if span_summary:
+            _planner_logger.info("long_span_plan", extra={"fields": {
+                "request_id": request_id, "destination": destination,
+                "span_unit": req.span_unit, "span_value": req.span_value,
+                "province": province, "months": len(span_summary.get("months", [])),
+            }})
+
+    return PlanResponse(
+        request_id=request_id,
+        destination=destination,
+        city_center=center,
+        days=req.days,
+        origin=req.origin,
+        travelers=req.travelers,
+        return_point=req.return_point,
+        group_type=req.group_type,
+        budget_level=req.budget_level,
+        style=req.style,
+        pace=req.pace,
+        traffic_mode=req.traffic_mode,
+        daily_start_time=req.daily_start_time,
+        ai_model=model_used,
+        source=source,
+        weather=weather,
+        departure_message=_departure_message(destination, req.days),
+        day_plans=day_plans,
+        all_pois=all_pois,
+        total_budget=total_budget,
+        budget_breakdown=budget_breakdown,
+        generated_at=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        span_summary=span_summary,
+    )
+
+
+async def _generate(req: PlanRequest, center: dict, pois: List[dict]):
+    """尝试 AI 生成，失败则用规则引擎。返回 (model_used, raw_plan, source)"""
+    use_ai = ai_mod.ai_available()
+    if use_ai:
+        req_dict = req.model_dump()
+        raw = await ai_mod.generate_itinerary(req_dict, pois)
+        if raw and raw.get("days"):
+            return ai_mod.resolve_model(), raw["days"], "ai"
+    raw = _rule_plan(req, center, pois)
+    return "(规则引擎)", raw, "rule"
+
+
+async def _build_items(poi_items: List[tuple], traffic_mode: str = "混合") -> List[PlanItem]:
+    """把 [(poi_dict, raw_item)] 转成 PlanItem，并计算站间交通。
+
+    注意：保持传入顺序（已由 _reorder_day 做地理近邻重排），
+    真实起止时间/时段由 _apply_timeline 统一计算，这里不再按 slot 重排。
+    """
+    out: List[PlanItem] = []
+    prev: dict = None
+    for poi, it in poi_items:
+        slot = it.get("slot", "上午")
+        item = PlanItem(
+            slot=slot,
+            start_time=SLOT_TIME.get(slot, "09:00"),
+            poi=POI(**poi),
+            duration_min=int(it.get("duration_min", 120)),
+            note=it.get("note", ""),
+        )
+        if prev is not None:
+            r = await amap.route([prev["lng"], prev["lat"]], [poi["lng"], poi["lat"]], traffic_mode)
+            item.transport = r["transport"]
+            item.transit_min = r["transit_min"]
+            item.distance_m = r["distance_m"]
+        prev = poi
+        out.append(item)
+    return out
+
+
+def _reorder_day(poi_items: List[tuple], center: dict,
+                 day_start: Optional[dict] = None) -> List[tuple]:
+    """同日内按地理位置重排（最近邻），减少来回折返。
+
+    规则：
+    - 夜生活（夜景/夜市/酒吧）固定放到一天末尾，保持「晚间活动」语义；
+    - 当天有景点时，第一个停靠点选离起点（住宿点/市中心）最近的景点；
+    - 其余点位按最近邻串起来，起点=起点锚点（有住宿时=住宿点，否则市中心）。
+    """
+    if len(poi_items) <= 1:
+        return poi_items
+    nights = [(p, it) for p, it in poi_items if p["category"] == "夜生活"]
+    body = [(p, it) for p, it in poi_items if p["category"] != "夜生活"]
+    if not body:
+        return nights
+    start = ([day_start["lng"], day_start["lat"]]
+             if day_start and day_start.get("lng") is not None
+             else [center["lng"], center["lat"]])
+    order = []
+    attractions = [x for x in body if x[0]["category"] == "景点"]
+    if attractions:
+        first = min(attractions, key=lambda x: amap.haversine(start[0], start[1], x[0]["lng"], x[0]["lat"]))
+        order.append(first)
+        body.remove(first)
+    cur = [order[-1][0]["lng"], order[-1][0]["lat"]] if order else start
+    remaining = body[:]
+    while remaining:
+        best = min(remaining, key=lambda x: amap.haversine(cur[0], cur[1], x[0]["lng"], x[0]["lat"]))
+        order.append(best)
+        remaining.remove(best)
+        cur = [best[0]["lng"], best[0]["lat"]]
+    if nights:
+        cur = [order[-1][0]["lng"], order[-1][0]["lat"]]
+        ns = sorted(nights, key=lambda x: amap.haversine(cur[0], cur[1], x[0]["lng"], x[0]["lat"]))
+        order.extend(ns)
+    return order
+
+
+# ============ 规则化地理规划：行政分级景点主线 + 就近辅助 ============
+# 行政分级 → 景点枚举关键词、聚类距离、闭馆标记、地标特征词等常量
+# 已迁移到 services/planner/planner_constants.py，通过 import 引入
+
+
+def _rank(p: dict) -> float:
+    """排序用评分：真实 rating + 地标加成（must_visit +0.3 / hot 热门 +0.1）。
+
+    仅用于排序/分组，不改变展示的 rating 字段。解决「天安门/故宫/天坛评分微差
+    (4.90 vs 4.93 vs 4.95) 时，天安门被分到次优子簇而挤出规划」的问题：
+    知识库顶级地标始终优先成为聚类种子，保证经典地标稳进行程。
+    """
+    bonus = 0.3 if p.get("must_visit") else (0.1 if p.get("hot") else 0.0)
+    return (p.get("rating") or 0) + bonus
+
+
+def _avg_rank(pois: List[dict]) -> float:
+    if not pois:
+        return 0.0
+    return sum(_rank(p) for p in pois) / len(pois)
+
+
+def _is_closed(p: dict) -> bool:
+    return any(m in (p.get("name") or "") for m in CLOSED_MARKERS)
+
+
+def _is_landmark(p: dict) -> bool:
+    """城市名片级地标：高德 type 标「世界遗产」或名称命中全国知名地标特征词。
+
+    用于让故宫、颐和园、八达岭长城这类「到这座城市必去」的点，
+    在同距离圈层内优先于普通知名点（如潭柘寺/北宫森林公园）。
+    """
+    t = p.get("type") or ""
+    if "世界遗产" in t:
+        return True
+    name = p.get("name") or ""
+    return any(w in name for w in LANDMARK_WORDS)
+
+
+async def _scope_attrs(adcode: str, scope: str, limit: int = 80) -> List[dict]:
+    """按行政编码检索某一级（区县/市/省）的景点候选。"""
+    kws = SCOPE_KEYWORDS.get(scope, ["景区"])
+    attrs = await amap.search_attractions(adcode, kws, limit=limit)
+    for p in attrs:
+        p["scope"] = scope
+    return attrs
+
+
+def _is_province(geo: dict) -> bool:
+    """目的地是否为省级（省/自治区）：省级目标按市分隔做路径规划。
+    直辖市（北京/上海/天津/重庆）视作单城市，不走按市分隔
+    （高德把直辖市 level 也标为「省」，须用 adcode 排除）。
+    兼容腾讯：腾讯 adcode 为 6 位（省级以 0000 结尾），level 为数字、无「省」字样。"""
+    ac = (geo.get("adcode") or "").strip()
+    if ac in ("110000", "120000", "310000", "500000"):
+        return False
+    level = (geo.get("level") or "").strip()
+    if "省" in level or "自治区" in level:
+        return True
+    if ac.isdigit():
+        if len(ac) <= 2:
+            return True
+        if len(ac) >= 4 and ac.endswith("0000"):
+            return True
+    return False
+
+
+async def _enumerate_scoped_attractions(geo: dict, center: dict) -> List[dict]:
+    """行政分级枚举景点：区/县 → 市 → 省 三级，合并去重、按评分排序。
+
+    防跨城污染：
+    - 市级/区县级目标：按高德 cityname 过滤掉不属于目标城市的 POI（如佛山不混入广州塔）；
+    - 省级目标：不过滤城市，改按 province 过滤（保留省内各市，供「按市分隔」规划）。
+    """
+    adcode = (geo.get("adcode") or "").strip()
+    city_ac = (adcode[:4] + "00") if (len(adcode) >= 4 and adcode.isdigit()) else ""
+    prov_ac = (adcode[:2] + "0000") if (len(adcode) >= 2 and adcode.isdigit()) else ""
+    is_prov = _is_province(geo)
+    tasks = []
+    if adcode:
+        tasks.append(_scope_attrs(adcode, "区县", 80))
+    if city_ac and city_ac != adcode:
+        tasks.append(_scope_attrs(city_ac, "市", 80))
+    if prov_ac and prov_ac != city_ac and prov_ac != adcode:
+        tasks.append(_scope_attrs(prov_ac, "省", 80))
+    results = await asyncio.gather(*tasks) if tasks else []
+    attrs = [p for r in results for p in r]
+    seen, uniq = set(), []
+    prov_norm = (geo.get("province") or geo.get("city") or "").replace("省", "").replace("市", "").strip()
+    city_norm = (geo.get("city") or "").replace("市", "").strip()
+    for p in attrs:
+        key = (p["name"], round(p["lng"], 3), round(p["lat"], 3))
+        if key in seen:
+            continue
+        if is_prov:
+            # 省级目标：保留归属目标省的 POI（省内各市全保留，供按市分隔）
+            pv = (p.get("province") or "").replace("省", "").strip()
+            if pv and prov_norm and pv != prov_norm:
+                continue
+        else:
+            # 非省目标：按高德 cityname 剔除跨城 POI
+            cn = (p.get("cityname") or "").replace("市", "").strip()
+            if cn and city_norm and cn != city_norm:
+                continue
+        seen.add(key)
+        uniq.append(p)
+    uniq = [p for p in uniq
+            if amap.haversine(center["lng"], center["lat"], p["lng"], p["lat"]) <= SCOPE_MAX_RANGE
+            and not _is_closed(p)]
+    uniq.sort(key=lambda p: -p.get("rating", 0))
+    return _drop_sub_venues(uniq)
+
+
+def _drop_sub_venues(pois: List[dict]) -> List[dict]:
+    """去掉「故宫博物院-中和殿」这类子场馆：当长名以短名开头、短名 ≤6 字、
+    且长名多出的部分以「-」开头时，视为短名的子场馆，剔除。"""
+    kept = []
+    for p in pois:
+        if any(q["name"] != p["name"] and p["name"].startswith(q["name"])
+               and len(q["name"]) <= 6 and p["name"][len(q["name"]):].strip().startswith("-")
+               for q in pois):
+            continue
+        kept.append(p)
+    return kept
+
+
+def _cluster_attractions(attrs: List[dict], max_dist: int = CLUSTER_MAX_DIST) -> List[dict]:
+    """把景点按地理邻近聚类成「区域」：短距离的景点归为一组（同一天）。
+
+    高分景点优先作为聚类种子，保证每个区域至少有一个优质点位。
+    """
+    clusters = []
+    for p in sorted(attrs, key=lambda x: -_rank(x)):
+        best, best_d = None, float("inf")
+        for c in clusters:
+            d = amap.haversine(c["cx"], c["cy"], p["lng"], p["lat"])
+            if d <= max_dist and d < best_d:
+                best, best_d = c, d
+        if best is None:
+            best = {"cx": p["lng"], "cy": p["lat"], "pois": []}
+            clusters.append(best)
+        best["pois"].append(p)
+        n = len(best["pois"])
+        best["cx"] = (best["cx"] * (n - 1) + p["lng"]) / n
+        best["cy"] = (best["cy"] * (n - 1) + p["lat"]) / n
+    for c in clusters:
+        c["avg_rating"] = sum(p.get("rating", 0) for p in c["pois"]) / max(1, len(c["pois"]))
+        c["pois"].sort(key=lambda p: -_rank(p))
+    return _merge_sparse_clusters(clusters)
+
+
+def _merge_sparse_clusters(clusters: List[dict], min_n: int = 2,
+                           merge_dist: int = 12_000) -> List[dict]:
+    """把景点过少的稀疏簇并入最近邻簇，保证每个区域有足够景点、区域连贯，
+    避免出现只有 1 个景点、再靠跨区补足污染行程的「空壳日」。"""
+    clusters = [dict(c) for c in clusters]
+    while True:
+        changed = False
+        for i in range(len(clusters)):
+            c = clusters[i]
+            if len(c.get("pois", [])) >= min_n:
+                continue
+            best, best_d = None, float("inf")
+            for j, o in enumerate(clusters):
+                if j == i or not o.get("pois"):
+                    continue
+                d = amap.haversine(c["cx"], c["cy"], o["cx"], o["cy"])
+                if d < best_d:
+                    best, best_d = j, d
+            if best is not None and best_d <= merge_dist:
+                o = clusters[best]
+                o["pois"].extend(c["pois"])
+                n = len(o["pois"])
+                o["cx"] = sum(p["lng"] for p in o["pois"]) / n
+                o["cy"] = sum(p["lat"] for p in o["pois"]) / n
+                o["avg_rating"] = sum(p.get("rating", 0) for p in o["pois"]) / n
+                clusters.pop(i)
+                changed = True
+                break
+        if not changed:
+            break
+    return clusters
+
+
+def _make_area(pois: List[dict]) -> dict:
+    n = len(pois)
+    return {
+        "cx": sum(p["lng"] for p in pois) / n,
+        "cy": sum(p["lat"] for p in pois) / n,
+        "pois": pois,
+        "avg_rating": sum(p.get("rating", 0) for p in pois) / n,
+    }
+
+
+def _greedy_group(pois: List[dict], max_n: int = 3, max_link: int = 6_000,
+                  center: Optional[dict] = None) -> List[dict]:
+    """把区域内的景点按「高分锚点 + 就近高分」分成 ≤max_n 的小区域。
+
+    关键：
+    - seed 取评分最高的未分配点；同分（尤其多个顶级地标并列时）取离市中心更近的，
+      使故宫/天安门/国博这类中轴线地标优先聚成一组，避免被评分微差拆散；
+    - 扩展时在距离阈值内取「评分最高」的邻居（同分取更近），
+      避免故宫(4.9)被更近但平庸的景山子场馆(4.6)拉低 —— 故宫会与
+      天安门/长安街(都4.9、1km内) 同组 avg≈4.9，稳居头名。
+    """
+    if center:
+        def _key(p):
+            return (-_rank(p), amap.haversine(center["lng"], center["lat"], p["lng"], p["lat"]))
+    else:
+        def _key(p):
+            return -_rank(p)
+
+    def _gdist(cx, cy, p):
+        return amap.haversine(cx, cy, p["lng"], p["lat"])
+
+    pois = sorted(pois, key=_key)
+    groups, unassigned = [], list(pois)
+    while unassigned:
+        seed = unassigned.pop(0)  # 剩余评分最高的（同分取市中心近）
+        group = [seed]
+        while len(group) < max_n and unassigned:
+            cx = sum(p["lng"] for p in group) / len(group)
+            cy = sum(p["lat"] for p in group) / len(group)
+            near = [p for p in unassigned if _gdist(cx, cy, p) <= max_link]
+            if not near:
+                break
+            # 同分时取更近的邻居，保证地标就近成组（如故宫↔天安门）
+            pick = max(near, key=lambda p: (_rank(p), -_gdist(cx, cy, p)))
+            group.append(pick)
+            unassigned.remove(pick)
+        groups.append(_make_area(group))
+    return groups
+
+
+def _split_to_balance(c: dict, max_n: int = 3, center: Optional[dict] = None) -> List[dict]:
+    """把区域拆成 ≤max_n 个景点的均衡子区域（高分锚点+最近邻分组）。"""
+    if len(c.get("pois", [])) <= max_n:
+        return [c]
+    return _greedy_group(c["pois"], max_n, center=center)
+
+
+def _dist_tier(d: float) -> int:
+    """距离分层：市区核心(≤10km) → 近郊(≤25km) → 远郊(≤60km) → 省内远点(>60km)。
+    核心先玩、远点最后，符合「出行距离短优先」。"""
+    if d <= 10_000:
+        return 0
+    if d <= 25_000:
+        return 1
+    if d <= 60_000:
+        return 2
+    return 3
+
+
+def _assign_areas_to_days(clusters: List[dict], center: dict, days: int) -> List[dict]:
+    """把区域分到每天：不同天不重复区域；大区域先拆成均衡子区域。
+
+    天序策略 = 「由近及远、按圈层轮流」：
+    - 圈层 zone = 市区(≤10km) / 近郊(≤25km) / 远郊(>25km)；
+    - 每天覆盖一个圈层且不重复，3 天北京 = 故宫天安门(市区) + 颐和园(近郊) + 八达岭长城(远郊)，
+      避免旧策略「市区占满 2 天」把远郊王牌（长城/乌镇等）挤掉；
+    - 远郊有评分门槛(≥4.5)，避免为凑远郊选烂点。
+    """
+    balanced = []
+    for c in clusters:
+        balanced.extend(_split_to_balance(c, 3, center))
+    for c in balanced:
+        c["dist_center"] = amap.haversine(center["lng"], center["lat"], c["cx"], c["cy"])
+        c["tier"] = _dist_tier(c["dist_center"])
+        c["zone"] = min(c["tier"], 2)  # 0市区 / 1近郊 / 2远郊
+        c["landmark"] = any(_is_landmark(p) for p in c.get("pois", []))
+    by_zone: dict = {}
+    for c in balanced:
+        by_zone.setdefault(c["zone"], []).append(c)
+    for z, items in by_zone.items():
+        # 同圈层内：城市名片(世界遗产/国家级) 优先 → 地标加权评分 → 距离近
+        items.sort(key=lambda c: (-c["landmark"], -_avg_rank(c["pois"]), c["dist_center"]))
+    zones = sorted(by_zone)
+
+    result = []
+    i = 0
+    while len(result) < days:
+        progressed = False
+        for z in zones:
+            if len(result) >= days:
+                break
+            if i < len(by_zone[z]):
+                cand = by_zone[z][i]
+                # 远郊评分门槛：不达标则本轮跳过，把名额让给近/中圈层
+                if z == 2 and cand.get("avg_rating", 0) < 4.5:
+                    continue
+                result.append(cand)
+                progressed = True
+        if not progressed:
+            break
+        i += 1
+    # 仍不足天数：从剩余区域按 (圈层, 评分, 距离) 补足
+    if len(result) < days:
+        rest = [c for c in balanced if c not in result]
+        rest.sort(key=lambda c: (c["zone"], -c["avg_rating"], c["dist_center"]))
+        result.extend(rest[: days - len(result)])
+    return result[:days]
+
+
+def _area_label(c: dict) -> str:
+    """区域主题名：取最高分景点名称去掉常见后缀。"""
+    if not c.get("pois"):
+        return "城市"
+    top = c["pois"][0]["name"]
+    for suf in ("风景名胜区", "名胜区", "风景区", "旅游度假区", "度假区", "旅游景区", "景区", "旅游区"):
+        if top.endswith(suf) and len(top) > len(suf) + 1:
+            top = top[: -len(suf)]
+            break
+    return top
+
+
+def _pick_auxiliary(area: dict, aux_pois: List[dict], used_ids: set) -> Optional[dict]:
+    """从城市候选池里为区域选就近辅助点（美食/购物/夜生活，不入主线）。
+    仅返回 15km 内的；没有则返回 None，由上层就地检索兜底。"""
+    pref = {"美食": 0, "夜生活": 1, "购物": 2}
+    cand = [p for p in aux_pois
+            if p["category"] in ("美食", "购物", "夜生活") and p["id"] not in used_ids
+            and not any(h in p["name"] for h in ("酒店", "宾馆", "大酒店", "大饭店", "客栈", "饭店"))
+            and not _is_closed(p)
+            and not (p["category"] == "美食"
+                     and any(b in p["name"] for b in AUX_FOOD_BAD_NAMES))]
+    cand.sort(key=lambda p: (pref.get(p["category"], 3),
+                             amap.haversine(area["cx"], area["cy"], p["lng"], p["lat"])))
+    for p in cand:
+        if amap.haversine(area["cx"], area["cy"], p["lng"], p["lat"]) <= 15_000:
+            return p
+    return None
+
+
+async def _local_aux(area: dict, used_ids: set) -> Optional[dict]:
+    """远处区域（乌镇/千岛湖等）就地检索辅助点，避免跨区污染。"""
+    for cat in ("美食", "夜生活", "购物"):
+        local = await amap.search_around(area["cx"], area["cy"], cat, 15_000, 6)
+        for p in local:
+            if p["id"] not in used_ids and not _is_closed(p) and not any(
+                    h in p["name"] for h in ("酒店", "宾馆", "大酒店", "大饭店", "客栈", "饭店")):
+                if cat == "美食" and any(b in p["name"] for b in AUX_FOOD_BAD_NAMES):
+                    continue
+                return p
+    return None
+
+
+def _dedup_landmark_day(picked: List[dict]) -> List[dict]:
+    """同一天内，名称命中同一地标特征词（如「长城」）的多个景点只保留评分最高的一个，
+    避免一天全是同一类地标（八达岭长城/居庸关长城/水关长城三连）。
+    不同特征词（如「颐和园」vs「圆明园」）互不影响，正常共存。"""
+    if len(picked) <= 1:
+        return picked
+    keep: List[dict] = []
+    for p in sorted(picked, key=lambda x: -_rank(x)):
+        words = {w for w in LANDMARK_WORDS if w in (p.get("name") or "")}
+        if any(any(w in (q.get("name") or "") for w in words) for q in keep):
+            continue
+        keep.append(p)
+    return keep
+
+
+async def _pick_hotel(area: dict) -> Optional[POI]:
+    """就近为当天选一个住宿点（当晚住宿 / 次日出发起点）。"""
+    try:
+        h = await amap.search_hotel_near(area["cx"], area["cy"])
+        if h:
+            return POI(**h)
+    except Exception:
+        pass
+    return None
+
+
+async def _build_geo_day(req: PlanRequest, center: dict, area: dict,
+                         aux_pois: List[dict], all_attrs: List[dict],
+                         used_ids: set, day_no: int,
+                         day_start: Optional[dict] = None) -> Optional[DayPlan]:
+    """构建一天：区域内 2-3 个景点（主线）+ 1 个就近辅助（美食/购物/夜生活点缀）。
+    区域景点不足时，从全部候选补「距区域中心最近」的未用景点。
+    day_start：当日出发锚点（有住宿时=前一晚住宿点，否则市中心），用于就近重排。"""
+    pace_items = PACE_ITEMS.get(req.pace, 4)
+    if req.group_type in GROUP_PACE:
+        pace_items = PACE_ITEMS.get(GROUP_PACE[req.group_type], pace_items)
+    n_attr = 2 if pace_items <= 3 else 3
+    picked = [p for p in area["pois"] if p["id"] not in used_ids][:n_attr]
+    if len(picked) < n_attr:
+        # 补足：仅允许「距区域中心 ≤10km」的未用景点（保持同天紧凑，杜绝跨区跳点）
+        used_now = {p["id"] for p in picked}
+        rest = [p for p in all_attrs
+                if p["id"] not in used_ids and p["id"] not in used_now
+                and amap.haversine(area["cx"], area["cy"], p["lng"], p["lat"]) <= 10_000]
+        rest.sort(key=lambda p: amap.haversine(area["cx"], area["cy"], p["lng"], p["lat"]))
+        picked.extend(rest[: n_attr - len(picked)])
+    # 同地标词去重：一天内不出现「长城三连」这类重复地标
+    picked = _dedup_landmark_day(picked)
+    if not picked:
+        return None
+    poi_items = []
+    for p in picked:
+        used_ids.add(p["id"])
+        # 时长优先用 LLM 建议（llm_duration），没有则用默认 150min
+        duration = int(p.get("llm_duration", 150))
+        # 时段优先用 LLM 建议（llm_best_slot），没有则用上午
+        slot = p.get("llm_best_slot", "上午")
+        if slot not in ("上午", "中午", "下午", "晚上"):
+            slot = "上午"
+        note = p.get("llm_reason", "") or "热门景点，建议错峰前往。"
+        poi_items.append((p, {"slot": slot, "duration_min": duration, "note": note}))
+    aux = _pick_auxiliary(area, aux_pois, used_ids)
+    if aux is None:
+        # 城市池里没有就近辅助点（多为远处区域）：就地检索，避免跨区污染
+        aux = await _local_aux(area, used_ids)
+    if aux:
+        used_ids.add(aux["id"])
+        slot = "晚上" if aux["category"] == "夜生活" else "中午"
+        poi_items.append((aux, {"slot": slot, "duration_min": 90,
+                                "note": {"美食": "就近用餐，饭点可能排队。", "购物": "就近购物逛街。",
+                                         "夜生活": "晚间休闲好去处。"}.get(aux["category"], "")}))
+    poi_items = _reorder_day(poi_items, center, day_start)
+    items = await _build_items(poi_items, req.traffic_mode)
+    items = _apply_timeline(req, items)
+    if not items:
+        return None
+    budget, _bd = _day_budget(req, items)
+    # 住宿锚点：就近检索一晚住宿（作为次日出发起点；单日行程展示为当晚住宿）
+    hotel = await _pick_hotel(area)
+    # 主题优先用 LLM 分组标签（当天景点中出现最多的 llm_theme）
+    theme_counts = {}
+    for p in picked:
+        t = p.get("llm_theme", "")
+        if t:
+            theme_counts[t] = theme_counts.get(t, 0) + 1
+    if theme_counts:
+        day_theme = max(theme_counts, key=theme_counts.get)
+    else:
+        day_theme = f"{_area_label({'pois': picked})} · 经典一日"
+    return DayPlan(
+        day=day_no,
+        theme=day_theme,
+        date_label=_date_label(day_no, req.days),
+        items=items, budget=budget,
+        hotel=hotel,
+        tip="热门场馆建议提前预约；早晚温差大，记得带件外套。",
+        inspiration=_daily_inspiration(day_theme, day_no),
+    )
+
+
+async def _inject_must_visit_attrs(city: str, attrs: List[dict]) -> List[dict]:
+    """把「必打卡」知名地标（must_visit 知识库）解析后注入主线景点池并置前。
+
+    行政枚举(attrs)依赖高德关键词召回，容易漏掉八达岭长城/颐和园这类顶级地标
+    （北京等直辖市还因 adcode 层级跳过市级/省级枚举，召回更依赖区县关键词）；
+    知识库地标按真实坐标解析后置入 attrs 头部，评分高自然成为聚类种子，
+    保证热门城市经典地标稳进规划，并放宽其距离约束（标记 hot）。
+    """
+    key = city.rstrip("市")
+    try:
+        # 后台 M6 优先读取 must_visit 表；表里无该城市数据时回退 py 知识库
+        from .admin_store import get_must_visit
+        entries = get_must_visit(key) or get_must_visit(city) or []
+        if not entries:
+            from .data.must_visit import MUST_VISIT
+            entries = MUST_VISIT.get(key) or MUST_VISIT.get(city) or []
+    except Exception:
+        try:
+            from .data.must_visit import MUST_VISIT
+            entries = MUST_VISIT.get(key) or MUST_VISIT.get(city) or []
+        except Exception:
+            return attrs
+    entries = [e for e in entries if e.get("category", "景点") == "景点"]
+    if not entries:
+        return attrs
+    seen = {a["name"] for a in attrs}
+    hot: List[dict] = []
+    for e in entries:
+        name = e.get("name", "")
+        if not name:
+            continue
+        # 同名地标已在行政枚举结果里：不打重复，但补打 must_visit/hot 权重与评分，
+        # 确保「天安门/故宫」这类本就在候选池的顶级地标也能获得排序加成进入规划。
+        if name in seen:
+            for a in attrs:
+                if a["name"] == name:
+                    a["must_visit"] = True
+                    a["hot"] = True
+                    a["rating"] = max(a.get("rating") or 0, float(e.get("rating", 4.8)))
+            continue
+        rp = await amap.resolve_poi(city, e.get("kw") or name, "景点")
+        if not rp:
+            # resolve_poi 失败（如地图 API 配额耗尽）：用城市中心坐标构建近似 POI，
+            # 确保 must_visit 地标能进入候选池，LLM 优化与规划引擎可正常运行；
+            # 地图 API 恢复后 resolve_poi 自动返回真实坐标，无需改代码。
+            try:
+                geo = await amap.geocode(city)
+                rp = {
+                    "id": f"must_{name}",
+                    "name": name,
+                    "category": "景点",
+                    "lng": float(geo["lng"]),
+                    "lat": float(geo["lat"]),
+                    "rating": float(e.get("rating", 4.8)),
+                    "address": "",
+                    "district": "",
+                    "cityname": city,
+                    "approximate": True,
+                }
+            except Exception:
+                continue
+        if _is_closed(rp):
+            continue
+        rp["rating"] = max(rp["rating"], float(e.get("rating", 4.8)))
+        rp["hot"] = True          # 放宽距离约束（amap 侧已对 hot 放行 100km）
+        rp["must_visit"] = True   # 标记知识库地标，便于后续优先级/主题处理
+        seen.add(rp["name"])
+        hot.append(rp)
+    return hot + attrs
+
+
+def _province_areas(attrs: List[dict], center: dict, days: int) -> List[dict]:
+    """省级目的地：按市分隔分配天数。
+
+    1) 全省景点按 cityname 分组（每组 = 一个市）；
+    2) 每个市内就近聚类成区域（复用 12km 聚类）；
+    3) 城市按（含城市名片数、评分、距省中心距离）排序；
+    4) 每天分配一个市的区域，先各市最佳区域，天数多于市数时回到高分市补充。
+    """
+    groups: dict = {}
+    for p in attrs:
+        cn = (p.get("cityname") or "").replace("市", "").strip() or (p.get("district") or "").strip()
+        groups.setdefault(cn, []).append(p)
+    city_clusters = [(cn, _cluster_attractions(ps)) for cn, ps in groups.items()]
+
+    def _city_key(item) -> tuple:
+        cn, cls = item
+        n_lm = sum(1 for c in cls for p in c.get("pois", []) if _is_landmark(p))
+        best = max((c.get("avg_rating", 0) for c in cls), default=0.0)
+        dist = min((amap.haversine(center["lng"], center["lat"], c["cx"], c["cy"]) for c in cls),
+                   default=float("inf"))
+        return (-n_lm, -best, dist)
+
+    city_clusters.sort(key=_city_key)
+    idx_by_city = {cn: 0 for cn, _ in city_clusters}
+    areas: List[dict] = []
+    while len(areas) < days:
+        progressed = False
+        for cn, cls in city_clusters:
+            if len(areas) >= days:
+                break
+            i = idx_by_city[cn]
+            if i < len(cls):
+                c = dict(cls[i])
+                c["city"] = cn
+                areas.append(c)
+                idx_by_city[cn] = i + 1
+                progressed = True
+        if not progressed:
+            break
+    return areas[:days]
+
+
+async def _geo_plan(req: PlanRequest, center: dict, aux_pois: List[dict],
+                    attrs: List[dict], is_province: bool = False) -> tuple:
+    """规则化地理规划主入口：景点聚类成区域 → 短距同日 → 跨天不重复。
+    省级目的地按市分隔规划（_province_areas）。
+    attrs 已由调用方完成「必打卡地标注入」。
+    返回 (day_plans, model_used, source)。
+    """
+    # 必去点位优先（解析并置前）
+    if req.must_include_poi:
+        known_names = {a["name"] for a in attrs}
+        for n in req.must_include_poi:
+            n = n.strip()
+            if not n or n in known_names:
+                continue
+            rp = await amap.resolve_poi(req.destination, n, "景点")
+            if rp and rp["name"] not in known_names:
+                attrs.insert(0, rp)
+                known_names.add(rp["name"])
+    # 候选不足时并入辅助池里的景点兜底
+    if len(attrs) < 6:
+        seen = {a["name"] for a in attrs}
+        for p in aux_pois:
+            if p["category"] == "景点" and p["name"] not in seen:
+                attrs.append(p)
+                seen.add(p["name"])
+    if is_province:
+        areas = _province_areas(attrs, center, req.days)
+    else:
+        clusters = _cluster_attractions(attrs)
+        areas = _assign_areas_to_days(clusters, center, req.days)
+    used_ids: set = set()
+    day_plans: List[DayPlan] = []
+    prev_hotel: Optional[POI] = None
+    for day_no, area in enumerate(areas, 1):
+        day_start = None
+        if prev_hotel is not None:
+            day_start = {"lng": prev_hotel.lng, "lat": prev_hotel.lat}
+        dp = await _build_geo_day(req, center, area, aux_pois, attrs, used_ids, day_no, day_start)
+        if dp:
+            day_plans.append(dp)
+            if dp.hotel is not None:
+                prev_hotel = dp.hotel
+    return day_plans, "(规则引擎)", "geo"
+
+
+def _region_of(poi) -> str:
+    """点位区域标签：优先高德区县名（如 西湖区/越城区），缺失时按坐标网格兜底（约 12km 格）。"""
+    if isinstance(poi, dict):
+        d = poi.get("district", "") or ""
+        lng, lat = poi.get("lng"), poi.get("lat")
+    else:
+        d = getattr(poi, "district", "") or ""
+        lng, lat = poi.lng, poi.lat
+    if d:
+        return d
+    if lng is None or lat is None:
+        return "?"
+    return f"G{round(float(lng), 2)},{round(float(lat), 2)}"
+
+
+def _day_focus(day: DayPlan) -> str:
+    """一天的主区域：出现次数最多的区县；平票时取「评分最高点位」所在的区县。"""
+    counts: dict = {}
+    for it in day.items:
+        r = _region_of(it.poi)
+        counts.setdefault(r, []).append(it)
+    if not counts:
+        return ""
+    best_key, best_r = None, ""
+    for r, its in counts.items():
+        key = (len(its), max(it.poi.rating for it in its))
+        if best_key is None or key > best_key:
+            best_key, best_r = key, r
+    return best_r
+
+
+def _pick_new_focus(dp: DayPlan, cur_focus: str, claimed: set,
+                    region_pool: dict, used_ids: set) -> Optional[str]:
+    """为与更早一天主区域重复的当天，挑选一个未被占用的新主区域：
+    优先当天的次选区域，其次离当天点位最近的、点位足够的新区域。"""
+    counts: dict = {}
+    for it in dp.items:
+        r = _region_of(it.poi)
+        if r == cur_focus or r in claimed:
+            continue
+        counts[r] = counts.get(r, 0) + 1
+    for r in sorted(counts, key=lambda x: -counts[x]):
+        usable = [p for p in region_pool.get(r, []) if p["id"] not in used_ids]
+        if len(usable) >= 2:
+            return r
+    if dp.items:
+        cx = sum(it.poi.lng for it in dp.items) / len(dp.items)
+        cy = sum(it.poi.lat for it in dp.items) / len(dp.items)
+        best_r, best_d = None, float("inf")
+        for r, ps in region_pool.items():
+            if not r or r in claimed or r == cur_focus:
+                continue
+            usable = [p for p in ps if p["id"] not in used_ids]
+            if len(usable) < 2:
+                continue
+            d = min(amap.haversine(cx, cy, p["lng"], p["lat"]) for p in usable)
+            if d < best_d:
+                best_d, best_r = d, r
+        return best_r
+    return None
+
+
+async def _rebuild_day_from_region(req: PlanRequest, center: dict, region: str,
+                                   dp: DayPlan, region_pool: dict, used_ids: set) -> Optional[List[PlanItem]]:
+    """用指定区域的未用点位按「景点/美食/购物/夜生活」骨架重建一天。"""
+    avail = [p for p in region_pool.get(region, []) if p["id"] not in used_ids]
+    if len(avail) < 2:
+        return None
+    by_cat: dict = {}
+    for p in avail:
+        by_cat.setdefault(p["category"], []).append(p)
+    for lst in by_cat.values():
+        lst.sort(key=lambda p: -p.get("rating", 0))
+
+    def pop(cat: str) -> Optional[dict]:
+        lst = by_cat.get(cat) or []
+        return lst.pop(0) if lst else None
+
+    plan = []
+    a = pop("景点")
+    if a:
+        plan.append(_rule_item(a, "上午", 150))
+    f = pop("美食")
+    if f:
+        plan.append(_rule_item(f, "中午", 75))
+    a2 = pop("景点")
+    if a2:
+        plan.append(_rule_item(a2, "下午", 150))
+    s = pop("购物")
+    if s:
+        plan.append(_rule_item(s, "下午", 90))
+    n = pop("夜生活")
+    if n:
+        plan.append(_rule_item(n, "晚上", 90))
+    poi_map = {p["id"]: p for p in avail}
+    poi_items = [(poi_map[it["poi_id"]], it) for it in plan if it["poi_id"] in poi_map]
+    if len(poi_items) < 2:
+        return None
+    poi_items = _reorder_day(poi_items, center)
+    items = await _build_items(poi_items, req.traffic_mode)
+    return _apply_timeline(req, items) or None
+
+
+async def _replace_strays(req: PlanRequest, center: dict, dp: DayPlan, focus: str,
+                          region_pool: dict, used_ids: set) -> Optional[List[PlanItem]]:
+    """把当天不在主区域 focus 的点位，替换为主区域未用点位（同品类优先），
+    保证「一天集中在一个区域」，避免混入其它地域的点位。"""
+    if not focus:
+        return None
+    avail = [p for p in region_pool.get(focus, []) if p["id"] not in used_ids]
+    if not avail:
+        return None
+    new_items = []
+    changed = False
+    for it in dp.items:
+        if _region_of(it.poi) == focus:
+            new_items.append(it)
+            continue
+        same = [p for p in avail if p["category"] == it.poi.category]
+        pool2 = same or avail
+        if not pool2:
+            new_items.append(it)
+            continue
+        pool2 = sorted(pool2, key=lambda p: -p.get("rating", 0))
+        p_new = pool2[0]
+        avail.remove(p_new)
+        new_items.append(PlanItem(
+            slot="上午", start_time="", poi=POI(**p_new),
+            duration_min=it.duration_min,
+            note="已调整为同区域人气点位（避免跨天重复地域）",
+        ))
+        changed = True
+    if not changed:
+        return None
+    poi_items = [(it.poi.model_dump(),
+                  {"slot": it.slot, "duration_min": it.duration_min, "note": it.note})
+                 for it in new_items]
+    poi_items = _reorder_day(poi_items, center)
+    rebuilt = await _build_items(poi_items, req.traffic_mode)
+    rebuilt = _apply_timeline(req, rebuilt)
+    return rebuilt or new_items
+
+
+async def _enforce_region_distinct(req: PlanRequest, center: dict, pois: List[dict],
+                                   day_plans: List[DayPlan]) -> List[DayPlan]:
+    """跨天地域去重：让每天集中在一个区域，且不同天不重复使用同一主区域。
+
+    两层处理：
+    - 主区域重复：若某天主区域已被更早一天占用，切换到未被占用的区域并重建当天；
+    - 同天混入他区：当天不在主区域的点位替换为主区域未用点位（解决「第2天在绍兴
+      却混入杭州点位」）。
+    点位不足（小城市/单区县）时自动跳过，不破坏原行程。
+    """
+    if len(day_plans) <= 1:
+        return day_plans
+    region_pool: dict = {}
+    for p in pois:
+        region_pool.setdefault(_region_of(p), []).append(p)
+    used_ids = {it.poi.id for dp in day_plans for it in dp.items}
+    claimed: set = set()
+    for dp in day_plans:
+        focus = _day_focus(dp)
+        if focus and focus in claimed:
+            new_focus = _pick_new_focus(dp, focus, claimed, region_pool, used_ids)
+            if new_focus:
+                rebuilt = await _rebuild_day_from_region(req, center, new_focus, dp,
+                                                         region_pool, used_ids)
+                if rebuilt:
+                    dp.items = rebuilt
+                    dp.budget, _bd = _day_budget(req, rebuilt)
+                    focus = new_focus
+        if focus:
+            claimed.add(focus)
+        rebuilt2 = await _replace_strays(req, center, dp, focus, region_pool, used_ids)
+        if rebuilt2:
+            dp.items = rebuilt2
+            dp.budget, _bd = _day_budget(req, rebuilt2)
+        used_ids = {it.poi.id for d in day_plans for it in d.items}
+    return day_plans
+
+
+def _match_pool_by_name(pool_by_name: dict, name: str) -> Optional[dict]:
+    """按名称匹配点位池：先精确，再双向包含（便于「西湖」命中「西湖风景名胜区」）"""
+    if not name:
+        return None
+    if name in pool_by_name:
+        return pool_by_name[name]
+    for pn, p in pool_by_name.items():
+        if name in pn or pn in name:
+            return p
+    return None
+
+
+def _balance_day(poi_items: List[tuple], spare_pois: List[dict], used_ids: set) -> List[tuple]:
+    """品类均衡 + 补足：保证每天的行程不是「一顿接一顿的美食」，且点位数量够用。
+
+    - 美食至多保留 2 个/天；
+    - 当天全是美食时，从备用池补一个高分非美食点位（景点/购物/夜生活）；
+    - 当天不足 3 个点位时，按「缺什么品类补什么」从备用池补足到 3 个。
+    """
+    if not poi_items:
+        return poi_items
+    food_seen = 0
+    balanced: List[tuple] = []
+    for poi, it in poi_items:
+        if poi["category"] == "美食":
+            if food_seen >= 2:
+                continue
+            food_seen += 1
+        balanced.append((poi, it))
+    if not any(poi["category"] != "美食" for poi, _ in balanced):
+        spare = [p for p in spare_pois
+                 if p["id"] not in used_ids and p["category"] in ("景点", "购物", "夜生活")]
+        if spare:
+            spare = sorted(spare, key=lambda p: -p.get("rating", 0))
+            p = spare[0]
+            balanced.append((p, {"slot": "上午", "duration_min": 150, "note": "补充当日亮点，建议错峰前往"}))
+            used_ids.add(p["id"])
+    # 不足 3 个时补足：优先补当天缺失的品类
+    cur_cats = {poi["category"] for poi, _ in balanced}
+    while len(balanced) < 3:
+        prefer = [c for c in ("景点", "美食", "购物", "夜生活") if c not in cur_cats]
+        cand = [p for p in spare_pois if p["id"] not in used_ids and p["category"] in prefer]
+        if not cand:
+            cand = [p for p in spare_pois if p["id"] not in used_ids]
+        if not cand:
+            break
+        cand = sorted(cand, key=lambda p: -p.get("rating", 0))
+        p = cand[0]
+        balanced.append((p, {"slot": "上午", "duration_min": 150, "note": "顺路补充的人气点位"}))
+        cur_cats.add(p["category"])
+        used_ids.add(p["id"])
+    return balanced
+
+
+def _apply_timeline(req: PlanRequest, items: List[PlanItem]) -> List[PlanItem]:
+    """时间轴合法性校验：按顺序累加「路上耗时 + 停留时长」，
+    落点必须处于每日窗口内；冲突自动顺延，超出窗口的活动截断。"""
+    sh, sm = map(int, req.daily_start_time.split(":"))
+    eh, em = map(int, req.daily_end_time.split(":"))
+    window_start = sh * 60 + sm
+    window_end = eh * 60 + em
+    cur = window_start
+    out: List[PlanItem] = []
+    for i, it in enumerate(items):
+        if i > 0:
+            cur += it.transit_min
+        if cur < window_start:
+            cur = window_start
+        if cur + it.duration_min > window_end:
+            if not out:
+                cur = window_start  # 首个活动也放不下窗口时，强制放入
+            else:
+                break
+        it.start_time = f"{cur // 60:02d}:{cur % 60:02d}"
+        h = cur // 60
+        it.slot = "上午" if h < 11 else ("中午" if h < 14 else ("下午" if h < 18 else "晚上"))
+        cur += it.duration_min
+        out.append(it)
+    return out
+
+
+def _rule_plan(req: PlanRequest, center: dict, pois: List[dict]) -> List[dict]:
+    """规则引擎：按类别/评分/距离把候选点位排成逐日行程"""
+    attractions = [p for p in pois if p["category"] == "景点"]
+    foods = [p for p in pois if p["category"] == "美食"]
+    shoppings = [p for p in pois if p["category"] == "购物"]
+    nights = [p for p in pois if p["category"] == "夜生活"]
+
+    # 必去点位优先（排到各池最前，保证先被选中）
+    must_names = {n.strip() for n in req.must_include_poi if n.strip()}
+    attractions = _prioritize(attractions, must_names)
+    foods = _prioritize(foods, must_names)
+    shoppings = _prioritize(shoppings, must_names)
+    nights = _prioritize(nights, must_names)
+
+    # 高分在前，同分时离市中心近的优先，减少折返（单次排序，勿被后续覆盖）
+    attractions.sort(key=lambda p: (-p.get("rating", 0),
+                                    amap.haversine(center["lng"], center["lat"], p["lng"], p["lat"])))
+    for _pool in (foods, shoppings, nights):
+        _pool.sort(key=lambda p: (-p.get("rating", 0),
+                                  amap.haversine(center["lng"], center["lat"], p["lng"], p["lat"])))
+
+    items_per_day = PACE_ITEMS.get(req.pace, 4)
+    group = req.group_type
+    if group in GROUP_PACE:
+        items_per_day = PACE_ITEMS.get(GROUP_PACE[group], items_per_day)
+
+    days = max(1, req.days)
+    themes = ["经典探索", "深度体验", "人文漫游", "轻松度假", "小众发现", "城市漫步", "美食之旅", "文化寻踪"]
+    used: set = set()
+    raw_days = []
+    for day_idx in range(days):
+        items = []
+
+        # 上午：景点
+        a = _pick_pool(attractions, used, day_idx)
+        if a:
+            used.add(a["id"])
+            items.append(_rule_item(a, "上午", 150))
+        # 中午：美食
+        f = _pick_pool(foods, used, day_idx)
+        if f:
+            used.add(f["id"])
+            items.append(_rule_item(f, "中午", 75))
+        # 下午：景点
+        a2 = _pick_pool(attractions, used, day_idx + 1)
+        if a2 and len(items) < items_per_day:
+            used.add(a2["id"])
+            items.append(_rule_item(a2, "下午", 150))
+        # 下午/傍晚：购物
+        s = _pick_pool(shoppings, used, day_idx)
+        if s and len(items) < items_per_day:
+            used.add(s["id"])
+            items.append(_rule_item(s, "下午", 90))
+        # 晚上：夜景/夜市
+        n = _pick_pool(nights, used, day_idx)
+        if n:
+            used.add(n["id"])
+            items.append(_rule_item(n, "晚上", 90))
+
+        # 点位不足时用美食补足（保证每天至少 3 个点位）
+        extra = 0
+        while len(items) < min(3, items_per_day):
+            fb = _pick_pool(foods, used, extra)
+            if not fb:
+                break
+            used.add(fb["id"])
+            items.append(_rule_item(fb, "中午" if len(items) == 0 else "晚上", 70))
+            extra += 1
+
+        tip = "热门场馆建议提前预约；早晚温差大，记得带件外套。"
+        raw_days.append({
+            "day": day_idx + 1,
+            "theme": f"第{day_idx + 1}天 · {themes[day_idx % len(themes)]}",
+            "tip": tip,
+            "items": items,
+        })
+    return raw_days
+
+
+def _pick_pool(pool: List[dict], used: set, rotate: int = 0):
+    """从点位池中选一个未用过的点位（带轮转），用完返回 None"""
+    if not pool:
+        return None
+    for i in range(len(pool)):
+        p = pool[(rotate + i) % len(pool)]
+        if p["id"] not in used:
+            return p
+    return None
+
+
+def _prioritize(pool: List[dict], must_names: set) -> List[dict]:
+    """把名称命中必去列表的点位排到最前"""
+    musts = [p for p in pool if p["name"] in must_names]
+    rest = [p for p in pool if p["name"] not in must_names]
+    return musts + rest
+
+
+def _rule_item(poi: dict, slot: str, duration: int) -> dict:
+    note = {
+        "景点": "热门打卡点，建议错峰前往。",
+        "美食": "本地人气美食，饭点需排队，建议错峰。",
+        "购物": "适合逛街购物，注意保留体力。",
+        "夜生活": "夜景观赏好去处。",
+    }.get(poi.get("category", ""), "")
+    return {"poi_id": poi["id"], "slot": slot, "duration_min": duration, "note": note}
+
+
+def _fallback_pois(center: dict, city: str) -> List[dict]:
+    """没有任何候选点位时的最低保障"""
+    base = [("城市地标广场", "景点", 0, 4.5), ("本地美食街", "美食", 60, 4.4)]
+    out = []
+    for i, (name, cat, price, rating) in enumerate(base):
+        out.append({"id": f"P{i:04d}", "name": f"{city}{name}", "lng": center["lng"] + 0.02 * i,
+                    "lat": center["lat"] - 0.01 * i, "address": city, "category": cat,
+                    "price": price, "rating": rating, "source": "mock"})
+    return out
+
+
+def _day_budget(req: PlanRequest, items: List[PlanItem]) -> tuple:
+    """单日预算：门票 + 餐饮 + 交通 + 住宿摊到每天"""
+    level = BUDGET_TABLE.get(req.budget_level, BUDGET_TABLE["适中"])
+    n_meals = sum(1 for it in items if it.poi.category in ("美食", "购物", "夜生活"))
+    meals = max(n_meals, 2)
+    food = meals * level["food"]
+    ticket = sum(it.poi.price for it in items if it.poi.category == "景点")
+    transport = level["transport"]
+    hotel = level["hotel"]
+    breakdown = {
+        "餐饮": round(food, 1), "门票": round(ticket, 1),
+        "交通": transport, "住宿": hotel,
+    }
+    return round(food + ticket + transport + hotel, 1), breakdown
+
+
+def _total_breakdown(day_plans: List[DayPlan]) -> dict:
+    keys = ("餐饮", "门票", "交通", "住宿")
+    out = {k: 0.0 for k in keys}
+    for dp in day_plans:
+        # 简单估算：按每天预算等分
+        out["餐饮"] += dp.budget * 0.4
+        out["住宿"] += dp.budget * 0.35
+        out["交通"] += dp.budget * 0.15
+        out["门票"] += dp.budget * 0.1
+    return {k: round(v, 1) for k, v in out.items()}
+
+
+def _date_label(day_no: int, days: int) -> str:
+    start = datetime.date.today()
+    return f"第{day_no}天 · {(start + datetime.timedelta(days=day_no - 1)).strftime('%m-%d')}"
+
+
+async def _emergency_plan(req: PlanRequest, center: dict, pois: List[dict]) -> List[DayPlan]:
+    """最后兜底：最简单的一天"""
+    poi = POI(**pois[0]) if pois else POI(id="P0001", name=f"{req.destination}城市漫步",
+                                          lng=center["lng"], lat=center["lat"], source="mock")
+    items = [PlanItem(slot="上午", start_time="09:00", poi=poi, duration_min=180, note="城市自由漫步")]
+    dp = DayPlan(day=1, theme="城市漫步一日", date_label="第1天", items=items,
+                 budget=100.0, tip="自由探索，随心而行。",
+                 inspiration=_daily_inspiration("城市漫步一日", 1))
+    return [dp]
+
+
+async def _ensure_days(req: PlanRequest, center: dict, pois: List[dict],
+                       day_plans: List[DayPlan]) -> List[DayPlan]:
+    """AI 产出天数不足时，用规则引擎补齐，保证共 req.days 天（去重已用点位）。"""
+    if len(day_plans) >= req.days:
+        return day_plans
+    poi_map = {p["id"]: p for p in pois}
+    used = {it.poi.id for dp in day_plans for it in dp.items}
+    raw_all = _rule_plan(req, center, pois)
+    need = req.days - len(day_plans)
+    added = 0
+    for raw in raw_all:
+        if added >= need:
+            break
+        poi_items = [(poi_map[it["poi_id"]], it) for it in raw.get("items", [])
+                     if it.get("poi_id") in poi_map and it["poi_id"] not in used]
+        if not poi_items:
+            continue
+        poi_items = _reorder_day(poi_items, center)
+        day_no = len(day_plans) + 1
+        items = await _build_items(poi_items, req.traffic_mode)
+        items = _apply_timeline(req, items)
+        if not items:
+            continue
+        used.update(it.poi.id for it in items)
+        budget, _breakdown = _day_budget(req, items)
+        day_plans.append(DayPlan(
+            day=day_no, theme=raw.get("theme", ""), date_label=_date_label(day_no, req.days),
+            items=items, budget=budget, tip=raw.get("tip", ""),
+            inspiration=_daily_inspiration(raw.get("theme", ""), day_no),
+        ))
+        added += 1
+    return day_plans
